@@ -439,7 +439,7 @@ textarea.text.lyr-area{min-height:160px;resize:vertical;font-family:"JetBrains M
       <span id="lyrLabel">가사 파일 넣기 <span style="opacity: 0.65; font-size: 11px;">.lrc / .srt</span></span>
     </label>
     <div class="field-group when-lyr"><label class="label-sub" for="fLyrText">가사</label>
-      <textarea class="text lyr-area" id="fLyrText" spellcheck="false" placeholder="[00:05.28] 첫 번째 줄&#10;[00:11.03] 두 번째 줄&#10;&#10;가사를 붙여 넣은 다음,&#10;타임라인을 옮겨 가며 '지금 시간 찍기'를 눌러도 돼요"></textarea>
+      <textarea class="text lyr-area" id="fLyrText" spellcheck="false" placeholder="[00:05.28] 첫 번째 줄&#10;[00:05.28] [-] 번역은 원문 바로 아래에 [-]를 붙여요&#10;[00:11.03] 두 번째 줄&#10;&#10;가사를 붙여 넣은 다음,&#10;타임라인을 옮겨 가며 '지금 시간 찍기'를 눌러도 돼요"></textarea>
       <p class="note" id="lyrNote">📄 [분:초] 뒤에 가사를 쓰면 그 시간에 나와요!</p>
     </div>
     <button type="button" class="copy-btn lyr-tap when-lyr-audio" id="lyrTap">⏱ 지금 시간 찍기 <span class="btn-sub">재생하면서 줄마다 누르기</span></button>
@@ -780,7 +780,7 @@ function layout(){
 }
 let stackKey='', stackVal=null;
 function getStack(tc){
-  const key=[S.title,S.artist,S.sub,S.font,S.layout,S.viz,S.progress,fontVer,lyrActive(),lyrPosEff(),S.lyrSize,S.lyrNext].join('|');
+  const key=[S.title,S.artist,S.sub,S.font,S.layout,S.viz,S.progress,fontVer,lyrActive(),lyrPosEff(),S.lyrSize,S.lyrNext,lyrHasTr].join('|');
   if(key===stackKey) return stackVal;
   ctx.save();
   const t=fit(S.title||' ',700,tc.ts,tc.tmin,tc.w,tc.lines,true);
@@ -803,6 +803,8 @@ function getStack(tc){
 /* ---------- lyrics (optional) ---------- */
 Object.assign(S,{lyrOn:false,lyrPos:'bottom',lyrSize:32,lyrNext:true,lyrOffset:0});
 let LYR=[], lyrUntimed=0, lyrKind='lrc';
+const LYR_TR=/^\[-\]\s*/;
+let lyrHasTr=false;
 const LRC_TAG=/\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g;
 function parseLyrics(src){
   const text=String(src||'').replace(/\r\n?/g,'\n');
@@ -814,22 +816,29 @@ function parseLyrics(src){
     for(const block of text.split(/\n\s*\n/)){
       const ls=block.split('\n'), i=ls.findIndex(l=>re.test(l)); if(i<0) continue;
       const m=ls[i].match(re);
-      const body=ls.slice(i+1).map(x=>x.trim()).filter(Boolean).join(' ').replace(/<[^>]+>/g,'').trim();
-      out.push({t:ts(m[1],m[2],m[3],m[4]),end:ts(m[5],m[6],m[7],m[8]),text:body});
+      const rows=ls.slice(i+1).map(x=>x.trim()).filter(Boolean);
+      const clean=x=>x.replace(/<[^>]+>/g,'').trim();
+      const body=clean(rows.filter(x=>!LYR_TR.test(x)).join(' '));
+      const tr=clean(rows.filter(x=>LYR_TR.test(x)).map(x=>x.replace(LYR_TR,'')).join(' '));
+      out.push({t:ts(m[1],m[2],m[3],m[4]),end:ts(m[5],m[6],m[7],m[8]),text:body,tr});
     }
     out.sort((a,b)=>a.t-b.t);
   } else {
+    let group=null;
     for(const raw of text.split('\n')){
       const line=raw.trim(); if(!line) continue;
+      const trm=line.match(/^(?:\[\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?\]\s*)*\[-\]\s*(.*)$/);
+      if(trm){ if(group){ const add=trm[1].trim(); for(const g of group) g.tr=g.tr?g.tr+' '+add:add; } continue; }
       const om=line.match(/^\[offset:\s*([+-]?\d+)\s*\]$/i); if(om){ fileOff=parseInt(om[1],10)/1000; continue; }
       if(/^\[[a-z]+:[^\]]*\]$/i.test(line)) continue;
       const lead=line.match(/^(\[\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?\]\s*)+/);
-      if(!lead){ untimed++; continue; }
+      if(!lead){ untimed++; group=null; continue; }
       const body=line.slice(lead[0].length).replace(/<\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?>/g,'').trim();
-      let m; LRC_TAG.lastIndex=0;
+      let m; LRC_TAG.lastIndex=0; group=[];
       while((m=LRC_TAG.exec(lead[0]))){
         const fr=m[3]?parseInt(m[3],10)/Math.pow(10,m[3].length):0;
-        out.push({t:Math.max(0,parseInt(m[1],10)*60+parseInt(m[2],10)+fr-fileOff),text:body});
+        const e={t:Math.max(0,parseInt(m[1],10)*60+parseInt(m[2],10)+fr-fileOff),text:body,tr:''};
+        out.push(e); group.push(e);
       }
     }
     out.sort((a,b)=>a.t-b.t);
@@ -847,8 +856,14 @@ function lyrAt(t){
 const lay0ArtBottom=()=>{ const a=layout().art; return a.y+a.s; };
 const lyrPosEff=()=>S.layout==='center'?'stack':S.lyrPos;
 const lyrActive=()=>S.lyrOn && LYR.length>0;
-const lyrStackSizes=()=>{ const s=Math.round(S.lyrSize*0.75); return {s, n:Math.round(s*0.66)}; };
-function lyrStackH(){ const z=lyrStackSizes(); return z.s*1.25+(S.lyrNext?10+z.n*1.25:0); }
+/* 번역이 있으면: 원문 → (좁은 간격) → 번역 → (넓은 간격) → 다음 줄 */
+function lyrDims(size,gapK){
+  const tr=lyrHasTr;
+  return { s:size, t:Math.max(18,Math.round(size*0.66)), n:Math.max(16,Math.round(size*(tr?0.58:0.62))),
+    gT:Math.round(size*0.26), gN:tr?Math.round(size*gapK):Math.round(size*0.3) };
+}
+const lyrStackSizes=()=>lyrDims(Math.round(S.lyrSize*0.75),0.95);
+function lyrStackH(){ const z=lyrStackSizes(); return z.s*1.25+(lyrHasTr?z.gT+z.t*1.25:0)+(S.lyrNext?z.gN+z.n*1.25:0); }
 const lyrFitCache=new Map();
 function lyrFit(text,w,size,maxW,maxLines){
   const k=[text,w,size,maxW,maxLines,S.font,fontVer].join('|'); let v=lyrFitCache.get(k); if(v) return v;
@@ -862,20 +877,24 @@ function lyrFade(cur,t){ return clamp((t-cur.t)/0.22,0,1); }
 function drawLyrStack(T,tc,y,center,t){
   const {cur,nx}=lyrAt(t), z=lyrStackSizes(), al=center?'center':'left';
   ctx.save();
-  if(cur){ const L=lyrFit(cur.text,700,z.s,tc.w,1), a=lyrFade(cur,t);
-    ctx.globalAlpha=a; lyrLines(L,tc.x,y+(1-a)*10+(z.s-L.size)*0.5,al,c(T.acc)); }
+  const trY=y+z.s*1.25+z.gT, nxY=y+z.s*1.25+(lyrHasTr?z.gT+z.t*1.25:0)+z.gN;
+  if(cur){ const L=lyrFit(cur.text,700,z.s,tc.w,1), a=lyrFade(cur,t), dy=(1-a)*10;
+    ctx.globalAlpha=a; lyrLines(L,tc.x,y+dy+(z.s-L.size)*0.5,al,c(T.acc));
+    if(cur.tr){ const R=lyrFit(cur.tr,500,z.t,tc.w,1); lyrLines(R,tc.x,trY+dy+(z.t-R.size)*0.5,al,c(T.ink,0.7)); } }
   if(S.lyrNext && nx){ const L=lyrFit(nx.text,500,z.n,tc.w,1);
-    ctx.globalAlpha=1; lyrLines(L,tc.x,y+z.s*1.25+10,al,c(T.ink,0.42)); }
+    ctx.globalAlpha=1; lyrLines(L,tc.x,nxY,al,c(T.ink,lyrHasTr?0.34:0.42)); }
   ctx.restore();
 }
 function drawLyrBottom(T,t){
-  const {cur,nx}=lyrAt(t), size=S.lyrSize, ns=Math.round(size*0.62), maxW=W-480, base=H-78;
+  const {cur,nx}=lyrAt(t), z=lyrDims(S.lyrSize,0.8), maxW=W-480, base=H-78;
   ctx.save();
   ctx.shadowColor=T.dark?'rgba(0,0,0,0.5)':'rgba(255,255,255,0.55)'; ctx.shadowBlur=18;
-  const nextH=S.lyrNext?ns*1.22+12:0;
-  if(S.lyrNext && nx){ const L=lyrFit(nx.text,500,ns,maxW,1); lyrLines(L,W/2,base-ns*1.22,'center',c(T.ink,0.45)); }
-  if(cur){ const L=lyrFit(cur.text,700,size,maxW,1), a=lyrFade(cur,t);
-    ctx.globalAlpha=a; lyrLines(L,W/2,base-nextH-L.size*1.22+(1-a)*12,'center',c(T.ink)); }
+  const nextH=S.lyrNext?z.n*1.22+z.gN:0, trH=lyrHasTr?z.t*1.22+z.gT:0;
+  if(S.lyrNext && nx){ const L=lyrFit(nx.text,500,z.n,maxW,1); lyrLines(L,W/2,base-z.n*1.22,'center',c(T.ink,lyrHasTr?0.38:0.45)); }
+  if(cur){ const L=lyrFit(cur.text,700,z.s,maxW,1), a=lyrFade(cur,t), dy=(1-a)*12;
+    ctx.globalAlpha=a;
+    lyrLines(L,W/2,base-nextH-trH-z.s*1.22+(z.s-L.size)*1.22+dy,'center',c(T.ink));
+    if(cur.tr){ const R=lyrFit(cur.tr,500,z.t,maxW,1); lyrLines(R,W/2,base-nextH-z.t*1.22+(z.t-R.size)*1.22+dy,'center',c(T.acc)); } }
   ctx.restore();
 }
 
@@ -1173,7 +1192,7 @@ async function saveFile(name,blob){
 }
 function baseName(){ const n=(S.title||'cover')+(S.artist?' - '+S.artist:''); return n.replace(/[\\/:*?"<>|]/g,'').trim().slice(0,80)||'cover'; }
 async function ensureFonts(){
-  const txt=(S.title+S.artist+S.sub+'0123456789:…'+(S.lyrOn?LYR.map(l=>l.text).join(''):''))||'a';
+  const txt=(S.title+S.artist+S.sub+'0123456789:…'+(S.lyrOn?LYR.map(l=>l.text+(l.tr||'')).join(''):''))||'a';
   const jobs=[700,500,400].map(w=>document.fonts.load(`${w} 40px "${S.font}"`,txt));
 
   const builtIn = ['Noto Sans KR', 'Noto Serif KR', 'NeoDunggeunmo', 'KOTRA_SONGEULSSI', 'JetBrains Mono'];
@@ -1644,12 +1663,12 @@ dz.addEventListener('drop',e=>{ e.preventDefault(); dragDepth=0; $('dropzone').c
 
 /* lyrics wiring */
 function applyLyrics(){
-  const r=parseLyrics($('fLyrText').value); LYR=r.lines; lyrUntimed=r.untimed; lyrKind=r.kind;
+  const r=parseLyrics($('fLyrText').value); LYR=r.lines; lyrUntimed=r.untimed; lyrKind=r.kind; lyrHasTr=LYR.some(l=>l.tr);
   lyrFitCache.clear(); stackKey='';
   const n=LYR.filter(l=>l.text).length, el=$('lyrNote');
   if(!$('fLyrText').value.trim()) el.textContent='📄 [분:초] 뒤에 가사를 쓰면 그 시간에 나와요!';
   else if(!LYR.length) el.textContent='📄 시간이 적힌 줄이 아직 없어요! 노래를 넣었다면 재생하면서 \'지금 시간 찍기\'를 눌러 보세요.';
-  else el.textContent=`가사 ${n}줄을 읽었어요`+(lyrUntimed?` · 시간이 없는 줄 ${lyrUntimed}개는 안 나와요`:'')+'.';
+  else el.textContent=`가사 ${n}줄을 읽었어요`+(lyrHasTr?` · 번역 ${LYR.filter(l=>l.tr).length}줄`:'')+(lyrUntimed?` · 시간이 없는 줄 ${lyrUntimed}개는 안 나와요`:'')+'.';
 }
 let lyrTimer=0;
 function onLyrText(){ clearTimeout(lyrTimer); lyrTimer=setTimeout(()=>{ applyLyrics(); onText(); },150); }
@@ -1669,15 +1688,20 @@ function stampLyr(){
   const t=Math.max(0,ptime());
   const stamp='['+String(Math.floor(t/60)).padStart(2,'0')+':'+(t%60).toFixed(2).padStart(5,'0')+'] ';
   const lineEnd=i=>{ const e=v.indexOf('\n',i); return e<0?v.length:e; };
-  const isTarget=(a,needUntimed)=>{ const ln=v.slice(a,lineEnd(a)).trim(); if(!ln || /^\[[a-z]+:[^\]]*\]$/i.test(ln)) return false; return needUntimed ? !/^\[\d{1,3}:\d{1,2}/.test(ln) : true; };
+  const isTarget=(a,needUntimed)=>{ const ln=v.slice(a,lineEnd(a)).trim(); if(!ln || /^\[[a-z]+:[^\]]*\]$/i.test(ln) || /^(\[\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?\]\s*)*\[-\]/.test(ln)) return false; return needUntimed ? !/^\[\d{1,3}:\d{1,2}/.test(ln) : true; };
   let ls=v.lastIndexOf('\n',Math.max(0,ta.selectionStart-1)); ls = ta.selectionStart===0 ? 0 : ls+1;
   while(ls<v.length && !isTarget(ls,false)) ls=lineEnd(ls)+1;
   if(ls>=v.length){ ls=0; while(ls<v.length && !isTarget(ls,true)) ls=lineEnd(ls)+1; }
   if(ls>=v.length){ setStatus('모든 줄에 시간이 들어갔어요! 다시 찍으려면 고칠 줄을 클릭한 뒤 눌러 주세요.'); return; }
-  const le=lineEnd(ls), body=v.slice(ls,le).replace(/^\s*(\[\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?\]\s*)+/,'');
-  const nv=v.slice(0,ls)+stamp+body+v.slice(le);
+  const TS=/^\s*(\[\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?\]\s*)+/;
+  let le=lineEnd(ls), block=stamp+v.slice(ls,le).replace(TS,'');
+  /* 바로 아래 [-] 번역 줄도 같은 시간으로 맞춰 줌 */
+  while(le<v.length){ const a=le+1, b=lineEnd(a), ln=v.slice(a,b);
+    if(!/^\s*(\[\d{1,3}:\d{1,2}(?:[.:]\d{1,3})?\]\s*)*\[-\]/.test(ln)) break;
+    block+='\n'+stamp+ln.replace(TS,'').trim(); le=b; }
+  const nv=v.slice(0,ls)+block+v.slice(le);
   ta.value=nv;
-  const nxt=Math.min(nv.length,ls+stamp.length+body.length+1);
+  const nxt=Math.min(nv.length,ls+block.length+1);
   ta.setSelectionRange(nxt,nxt);
   const lh=parseFloat(getComputedStyle(ta).lineHeight)||20, row=nv.slice(0,ls).split('\n').length-1;
   ta.scrollTop=Math.max(0,(row-2)*lh);
