@@ -1,0 +1,1523 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>윳! 뮤직 프레임 메이커</title>
+
+<!-- 파비콘 -->
+<link rel="icon" href="./favicon.ico" type="image/x-icon">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Nanum+Pen+Script&family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@latest/neodgm/style.css">
+<style>
+@font-face {
+  font-family: 'KOTRA_SONGEULSSI';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10-21@1.0/KOTRA_SONGEULSSI.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face{font-family:"Pretendard";font-weight:400;font-display:swap;src:local("Pretendard Regular"),local("Pretendard-Regular"),url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2") format("woff2")}
+@font-face{font-family:"Pretendard";font-weight:500;font-display:swap;src:local("Pretendard Medium"),local("Pretendard-Medium"),url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Medium.woff2") format("woff2")}
+@font-face{font-family:"Pretendard";font-weight:600;font-display:swap;src:local("Pretendard SemiBold"),local("Pretendard-SemiBold"),url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-SemiBold.woff2") format("woff2")}
+@font-face{font-family:"Pretendard";font-weight:700;font-display:swap;src:local("Pretendard Bold"),local("Pretendard-Bold"),url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Bold.woff2") format("woff2")}
+@font-face{font-family:"Pretendard";font-weight:800;font-display:swap;src:local("Pretendard ExtraBold"),local("Pretendard-ExtraBold"),url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-ExtraBold.woff2") format("woff2")}
+:root{
+  --bg-stage:#eef6fb; --text-main:#1e293b; --text-sub:#64748b; --text-muted:#94a3b8;
+  --border:#e2e8f0; --accent:#51aae1; --accent-hover:#3d98cf; --accent-deep:#328ec7;
+  --accent-soft:#85c8f2; --accent-light:#eff6ff; --border-accent:#dbeafe;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{display:flex;height:100vh;height:100dvh;font-family:"Pretendard",-apple-system,BlinkMacSystemFont,system-ui,"Noto Sans KR",sans-serif;color:var(--text-main);overflow:hidden;background:var(--bg-stage);-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button,input,select{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* editor */
+.editor{width:440px;flex-shrink:0;background-color:#f8fafc;background-image:radial-gradient(#dce7f0 1.2px,transparent 1.2px);background-size:14px 14px;border-right:1.5px solid var(--border);padding:22px 18px 60px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;box-shadow:4px 0 24px rgba(15,23,42,.05);z-index:10}
+.editor::-webkit-scrollbar{width:6px}
+.editor::-webkit-scrollbar-track{background:transparent}
+.editor::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+.editor::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+.editor-title{font-size:21px;font-weight:800;letter-spacing:-.02em;padding-bottom:12px;border-bottom:2px solid #e2e8f0;color:#334155;display:flex;align-items:center;gap:2px}
+.editor-title .hl{background:rgba(81,170,225,.5)}
+@keyframes medSyringeFloat{0%{transform:translateY(0) rotate(-16deg)}50%{transform:translateY(-5px) rotate(-10deg)}100%{transform:translateY(2px) rotate(-18deg)}}
+.syringe-logo-svg{width:48px;height:48px;flex-shrink:0;margin-top:4px;margin-left:-2px;animation:medSyringeFloat 3.8s ease-in-out infinite alternate;filter:drop-shadow(0 3px 6px rgba(81,170,225,.35))}
+
+.panel-card{display:flex;flex-direction:column;gap:11px;padding:15px;background:rgba(255,255,255,.95);border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 2px 8px rgba(15,23,42,.03);backdrop-filter:blur(4px)}
+.panel-card-title{font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:.02em;display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.panel-divider{height:1px;background:#edf2f7;margin:2px 0}
+.field-group{display:flex;flex-direction:column;gap:7px}
+.label-sub{font-size:11.5px;font-weight:700;color:var(--text-sub);letter-spacing:-.01em}
+.text{width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;background:#fff;color:var(--text-main);outline:none;transition:all .15s ease}
+.text::placeholder{color:var(--text-muted)}
+.text:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(81,170,225,.18)}
+/* 폰트 전용 가로 3개 x 세로 2줄 (3x2) 그리드 */
+/* 폰트 전용 3x2 그리드 */
+.seg.seg-font{
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 5px;
+  background: #f1f5f9;
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+.seg.seg-font button{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .15s ease;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.seg.seg-font button:hover{
+  background: rgba(255, 255, 255, 0.6);
+}
+.seg.seg-font button[aria-pressed="true"]{
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.seg.seg-font button .f-sample{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  line-height: 1;
+  font-size: 13px;
+  color: var(--text-main);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.seg.seg-font button .f-name{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  line-height: 1;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-sub);
+  white-space: nowrap;
+  margin-top: 3px;
+}
+.seg.seg-font button[aria-pressed="true"] .f-name{
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+
+.f-pretendard{ font-family: "Pretendard", sans-serif; }
+.f-serif{ font-family: "Noto Serif KR", serif; }
+.f-inter{ font-family: "Inter Tight", sans-serif; }
+.f-pixel{ font-family: "NeoDunggeunmo", monospace; }
+.f-hand{ font-family: "KOTRA_SONGEULSSI", cursive, sans-serif; font-size: 12px !important; }
+.f-mono{ font-family: "JetBrains Mono", monospace; font-size: 11.5px !important; }
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.seg{display:flex;gap:5px;background:#f1f5f9;padding:4px;border-radius:10px;border:1px solid #e2e8f0}
+.seg button{flex:1;padding:6px 0;border:none;background:transparent;border-radius:7px;font-size:12.5px;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s ease;white-space:nowrap}
+.seg button:hover{color:#334155}
+.seg button[aria-pressed="true"]{background:#fff;color:#334155;font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+
+.toggle-row{position:relative;display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;width:fit-content;padding:2px 0}
+.toggle-row input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.sw-track{width:38px;height:22px;background:#e2e8f0;border-radius:22px;position:relative;transition:background .2s ease;flex-shrink:0}
+.sw-track::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.toggle-row input:checked + .sw-track{background:var(--accent)}
+.toggle-row input:checked + .sw-track::after{transform:translateX(16px)}
+.toggle-row input:focus-visible + .sw-track{outline:2px solid var(--accent);outline-offset:2px}
+.toggle-label{font-size:12.5px;font-weight:700;color:var(--text-main)}
+
+.range-row{display:flex;align-items:center;gap:12px}
+.range-row input[type=range]{flex:1;min-width:0;width:100%;height:22px;-webkit-appearance:none;appearance:none;cursor:pointer;border:0;outline:0;background:transparent;touch-action:pan-y}
+.range-row input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.range-row input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:999px;background:linear-gradient(to right,#51aae1 0%,#51aae1 var(--val,0%),#e2e8f0 var(--val,0%),#e2e8f0 100%)}
+.range-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-8px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ffffff' stroke='%2351aae1' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;border:0;filter:drop-shadow(0 2px 4px rgba(81,170,225,.3));transition:transform .15s ease}
+.range-row input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.range-row input[type=range]::-moz-range-track{height:6px;border-radius:999px;background:#e2e8f0}
+.range-row input[type=range]::-moz-range-progress{height:6px;border-radius:999px;background:#51aae1}
+.range-row input[type=range]::-moz-range-thumb{width:22px;height:22px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ffffff' stroke='%2351aae1' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;border:0}
+.range-row input[type=range]:disabled{opacity:.45;cursor:not-allowed}
+.range-row .val{font-size:12px;width:46px;text-align:right;color:#475569;font-variant-numeric:tabular-nums;font-weight:700;flex-shrink:0}
+
+.file-dropzone{position:relative;border:1.5px dashed #cbd5e1;background:#f8fafc;border-radius:10px;padding:13px 12px;text-align:center;cursor:pointer;font-size:12.5px;font-weight:700;color:#476579;display:block;transition:all .2s ease;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.file-dropzone:hover{border-color:var(--accent);background:#f0f7fb}
+.file-dropzone:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(81,170,225,.18)}
+.file-dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.file-dropzone.loaded{border-style:solid;border-color:var(--accent-soft);background:var(--accent-light);color:var(--accent-deep)}
+.file-dropzone{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.file-dropzone svg{
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+.mini-btn{align-self:flex-start;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;font-weight:700;color:var(--text-sub);padding:3px 8px;cursor:pointer;transition:all .15s ease}
+.mini-btn:hover{background:#c7e8fc;border-color:var(--accent);color:var(--accent)}
+
+.color-picker-wrap{flex:1;display:flex;align-items:center;gap:8px;background:#fff;padding:4px 8px 4px 10px;border:1.5px solid #e2e8f0;border-radius:9px;height:35px;transition:border-color .15s,opacity .15s}
+.color-picker-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgba(81,170,225,.18)}
+.color-picker-wrap.off{opacity:.45}
+.color-picker-wrap input[type=color]{-webkit-appearance:none;border:1px solid rgba(0,0,0,.1);width:20px;height:20px;border-radius:50%;cursor:pointer;background:none;padding:0;flex-shrink:0}
+.color-picker-wrap input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.color-picker-wrap input[type=color]::-webkit-color-swatch{border:none;border-radius:50%}
+.color-picker-wrap input[type=color]:disabled{cursor:not-allowed}
+/* 기존 .picker-label-text 찾아서 아래 스타일로 교체 */
+.picker-label-text{
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 72px;
+  padding: 0;
+  font-family: inherit;
+}
+.picker-label-text:disabled{
+  cursor: not-allowed;
+  color: #94a3b8;
+}
+.acc-row{display:flex;align-items:center;gap:12px}
+
+.save-btn{width:100%;padding:13px 0;background:linear-gradient(135deg,#64b5e8 0%,#3d98cf 100%);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;letter-spacing:-.01em;cursor:pointer;box-shadow:0 4px 14px rgba(61,152,207,.32);transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.save-btn:hover{background:linear-gradient(135deg,#51aae1 0%,#2f87bd 100%);transform:translateY(-2px);box-shadow:0 6px 18px rgba(61,152,207,.42)}
+.copy-btn{width:100%;padding:13px 0;background:#f1f5f9;color:#334155;border:1.5px solid #cbd5e1;border-radius:12px;font-size:14px;font-weight:800;letter-spacing:-.01em;cursor:pointer;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.copy-btn:hover{background:#e2e8f0;border-color:#94a3b8;transform:translateY(-2px)}
+.save-btn:active,.copy-btn:active{transform:translateY(0)}
+.save-btn:disabled,.copy-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.save-btn .btn-sub {
+  opacity: 0.72;
+  font-weight: 500;
+  font-size: 12.5px;
+}
+.meter{height:6px;border-radius:999px;background:#e2e8f0;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s linear}
+.note{font-size:11.5px;font-weight:500;color:var(--text-sub);line-height:1.6}
+.status{font-size:12.5px;font-weight:700;color:var(--accent-deep);min-height:1.4em}
+.status:empty{display:none}
+
+/* stage */
+.stage{flex:1;min-width:0;background-color:#eef6fb;background-image:radial-gradient(circle at 50% 50%,rgba(255,255,255,.75) 0%,transparent 85%),radial-gradient(rgba(141,186,218,.38) 1.2px,transparent 1.2px);background-size:100% 100%,11px 11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px;overflow:auto;position:relative}
+.canvas-container,.stage-bar,.hint{width:min(100%,calc((100dvh - 230px) * 16 / 9))}
+.canvas-container{position:relative;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 18px 45px rgba(51,114,161,.14),0 4px 14px rgba(15,23,42,.06),0 0 0 1px rgba(186,218,240,.6)}
+#stage{display:block;width:100%;height:auto;aspect-ratio:16/9}
+.drop-overlay{position:absolute;inset:0;display:none;place-items:center;background:rgba(81,170,225,.55);color:#fff;font-size:20px;font-weight:800;border:3px dashed rgba(255,255,255,.85);border-radius:14px}
+.dragging .drop-overlay{display:grid}
+.stage-bar{align-items:center;gap:12px;padding:8px 12px 8px 8px;background:rgba(255,255,255,.95);border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 2px 8px rgba(15,23,42,.03)}
+.stage-bar .range-row{flex:1;min-width:60px}
+.iconbtn{width:36px;height:36px;border-radius:50%;border:0;background:linear-gradient(135deg,#64b5e8 0%,#3d98cf 100%);color:#fff;display:grid;place-items:center;cursor:pointer;flex:none;box-shadow:0 3px 10px rgba(61,152,207,.3)}
+.iconbtn:disabled{opacity:.45;cursor:not-allowed}
+.time{font-variant-numeric:tabular-nums;color:#475569;font-size:12px;font-weight:700;white-space:nowrap}
+.hint{font-size:10.5px;font-weight:500;color:var(--text-sub);text-align:center}
+
+/* visibility */
+.when-audio,.when-cyber,.when-cover{display:none!important}
+.has-audio .when-audio,.deco-cyber .when-cyber,.has-cover .when-cover{display:flex!important}
+.has-audio .when-noaudio{display:none!important}
+.hidden{display:none!important}
+
+@media (max-width:860px){
+  body{flex-direction:column;height:auto;overflow-y:auto}
+  .editor{width:100%;overflow:visible;box-shadow:none;border-right:none;border-top:1.5px solid var(--border);order:2}
+  .stage{order:1;padding:18px;overflow:visible}
+  .canvas-container,.stage-bar,.hint{width:100%}
+}
+@media (prefers-reduced-motion: reduce){.syringe-logo-svg{animation:none}.meter i{transition:none}}
+</style>
+</head>
+<body>
+<aside class="editor">
+  <h1 class="editor-title">
+    <svg class="syringe-logo-svg" viewBox="0 0 120 460" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="syringeHalftone" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+            <circle cx="3" cy="3" r="1.4" fill="#ffffff" opacity="0.65"></circle>
+          </pattern>
+          <linearGradient id="softSyringeFluid" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#dbeafe"></stop>
+            <stop offset="50%" stop-color="#85c8f2"></stop>
+            <stop offset="100%" stop-color="#51aae1"></stop>
+          </linearGradient>
+          <clipPath id="barrelClip">
+            <rect x="38.5" y="85" width="43" height="175"></rect>
+          </clipPath>
+        </defs>
+
+        <!-- 주사기 바늘 & 마운트 -->
+        <path d="M60 0 V60" stroke="#328ec7" stroke-width="4.5" stroke-linecap="round"></path>
+        <rect x="47" y="60" width="26" height="15" rx="3" fill="#ffffff" stroke="#328ec7" stroke-width="3"></rect>
+        <line x1="47" y1="68" x2="73" y2="68" stroke="#85c8f2" stroke-width="3"></line>
+        <rect x="34" y="75" width="52" height="10" rx="3" fill="#85c8f2" stroke="#328ec7" stroke-width="3"></rect>
+
+        <!-- 주사기 몸체 -->
+        <rect x="36" y="85" width="48" height="265" rx="6" fill="#ffffff" stroke="#328ec7" stroke-width="3.2"></rect>
+        <rect x="38.5" y="85" width="43" height="175" fill="url(#softSyringeFluid)"></rect>
+        <rect x="38.5" y="85" width="43" height="175" fill="url(#syringeHalftone)"></rect>
+
+        <!-- 뽀글뽀글 기포 애니메이션 -->
+        <g clip-path="url(#barrelClip)">
+          <circle cx="50" cy="245" r="4.5" fill="#ffffff">
+            <animate attributeName="cy" from="245" to="90" dur="1.9s" repeatCount="indefinite"></animate>
+            <animate attributeName="cx" values="50;46;53;50" dur="1.9s" repeatCount="indefinite"></animate>
+            <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.15;0.85;1" dur="1.9s" repeatCount="indefinite"></animate>
+          </circle>
+          <circle cx="67" cy="245" r="5.8" fill="#ffffff">
+            <animate attributeName="cy" from="245" to="90" dur="2.5s" begin="0.4s" repeatCount="indefinite"></animate>
+            <animate attributeName="cx" values="67;71;63;67" dur="2.5s" begin="0.5s" repeatCount="indefinite"></animate>
+            <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.15;0.85;1" dur="2.5s" begin="0.5s" repeatCount="indefinite"></animate>
+          </circle>
+          <circle cx="58" cy="245" r="3.2" fill="#eff6ff">
+            <animate attributeName="cy" from="245" to="90" dur="1.6s" begin="0.2s" repeatCount="indefinite"></animate>
+            <animate attributeName="cx" values="58;55;60;58" dur="1.6s" begin="0.2s" repeatCount="indefinite"></animate>
+            <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.15;0.85;1" dur="1.6s" begin="0.2s" repeatCount="indefinite"></animate>
+          </circle>
+        </g>
+
+        <!-- 피스톤 고무 & 손잡이 -->
+        <rect x="38.5" y="252" width="43" height="10" fill="#1b4b6b"></rect>
+        <line x1="38.5" y1="252" x2="81.5" y2="252" stroke="#dbeafe" stroke-width="2.5"></line>
+        <rect x="42" y="262" width="36" height="6" fill="#328ec7"></rect>
+        <rect x="54" y="268" width="12" height="120" fill="#f8fafc" stroke="#328ec7" stroke-width="3"></rect>
+        <rect x="32" y="388" width="56" height="12" rx="4" fill="#ffffff" stroke="#328ec7" stroke-width="3"></rect>
+        <rect x="37" y="391" width="46" height="6" rx="2" fill="#85c8f2"></rect>
+      </svg>
+    <span>윳! <span class="hl">뮤직 프레임</span> 메이커</span>
+  </h1>
+
+  <section class="panel-card">
+  <div class="panel-card-title">✦ 앨범 자켓 및 노래</div>
+  <label class="file-dropzone" id="imgDrop">
+    <input type="file" accept="image/*" id="imgIn">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 12.01h.01"/>
+      <path d="M18 8v4a8 8 0 0 1-1.07 4"/>
+      <circle cx="10" cy="12" r="4"/>
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+    </svg>
+    <span id="imgLabel">앨범 커버 넣기 <span style="opacity: 0.65; font-size: 11px;">1:1 정방형 권장</span></span>
+  </label>
+  <button type="button" class="mini-btn when-cover" id="imgRemove">커버 제거</button>
+  <label class="file-dropzone" id="audDrop">
+    <input type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg,.aac" id="audIn">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    <span id="audLabel">노래 파일 넣기 <span style="opacity: 0.65; font-size: 11px;">선택사항</span></span>
+  </label>
+  <p class="note">💬 파일은 서버에 <b>저장되지 않으니</b> 안심하세요!</p>
+</section>
+
+  <section class="panel-card">
+    <div class="panel-card-title">✦ 곡 정보</div>
+    <div class="field-group"><label class="label-sub" for="fTitle">제목</label><input class="text" id="fTitle" value="SONG TITLE"></div>
+    <div class="field-group"><label class="label-sub" for="fArtist">아티스트</label><input class="text" id="fArtist" value="PURE X UXI" placeholder="아티스트 이름"></div>
+    <div class="field-group"><label class="label-sub" for="fSub">곡 설명 또는 맘에 드는 가사 한 줄</label><input class="text" id="fSub" value="" placeholder="필수 X"></div>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-card-title">✦ 디자인</div>
+    <div class="field-group"><span class="label-sub">레이아웃</span>
+      <div class="seg" data-key="layout"><button data-val="split">기본</button><button data-val="center">센터</button><button data-val="vinyl">LP</button></div>
+    </div>
+    <div class="field-group"><span class="label-sub">배경</span>
+      <div class="seg" data-key="bg"><button data-val="blur">커버 흐림</button><button data-val="gradient">그라데이션</button><button data-val="solid">단색</button></div>
+    </div>
+    <div class="field-group"><span class="label-sub">분위기</span>
+      <div class="seg" data-key="mood"><button data-val="auto">자동 설정</button><button data-val="dark">어둡게</button><button data-val="light">밝게</button></div>
+    </div>
+    
+    <div class="field-group">
+      <span class="label-sub">글꼴</span>
+      <div class="seg seg-font" data-key="font">
+        <button data-val="Pretendard">
+          <span class="f-sample f-pretendard">가나다 Aa</span>
+          <span class="f-name">프리텐다드</span>
+        </button>
+        <button data-val="Noto Serif KR">
+          <span class="f-sample f-serif">가나다 Aa</span>
+          <span class="f-name">노토 세리프</span>
+        </button>
+        <button data-val="Inter Tight">
+          <span class="f-sample f-inter">Abc 123</span>
+          <span class="f-name">Inter Tight</span>
+        </button>
+        <button data-val="NeoDunggeunmo">
+          <span class="f-sample f-pixel">가나다 Aa</span>
+          <span class="f-name">둥근모꼴</span>
+        </button>
+        <button data-val="KOTRA_SONGEULSSI">
+          <span class="f-sample f-hand">가나다 Aa</span>
+          <span class="f-name">코트라 손글씨</span>
+        </button>
+        <button data-val="JetBrains Mono">
+          <span class="f-sample f-mono">Code 01</span>
+          <span class="f-name">모노스페이스</span>
+        </button>
+      </div>
+      <p class="note" id="fontNote" style="margin-top:2px"></p>
+    </div>
+    
+    <div class="field-group"><label class="label-sub" for="fRadius">커버 모서리</label>
+      <div class="range-row"><input type="range" id="fRadius" min="0" max="48" value="18"><span class="val" id="vRadius">18</span></div>
+    </div>
+    <div class="field-group"><span class="label-sub">포인트 색</span>
+      <div class="acc-row">
+        <label class="toggle-row"><input type="checkbox" id="fAccAuto" checked><span class="sw-track"></span><span class="toggle-label">이미지 자동 추출</span></label>
+        <div class="color-picker-wrap off" id="accWrap">
+  <input type="color" id="fAcc" value="#2389C8" disabled aria-label="포인트 색 직접 고르기">
+  <input type="text" class="picker-label-text" id="accHex" value="#2389C8" maxlength="7" spellcheck="false" disabled aria-label="컬러 헥스코드 직접 입력">
+</div>
+      </div>
+    </div>
+    <div class="panel-divider"></div>
+    <div class="field-group"><span class="label-sub">테두리 꾸밈</span>
+      <div class="seg" data-key="deco"><button data-val="none">없음</button><button data-val="line">라인</button><button data-val="cyber">사이버</button></div>
+    </div>
+    <label class="toggle-row when-cyber"><input type="checkbox" id="fHud" checked><span class="sw-track"></span><span class="toggle-label">모서리 문구</span></label>
+    <div class="field-group when-cyber"><label class="label-sub" for="fHudBL">왼쪽 아래 HUD 문구</label><input class="text" id="fHudBL" value="30FPS"></div>
+    <label class="toggle-row when-cyber"><input type="checkbox" id="fScan"><span class="sw-track"></span><span class="toggle-label">스캔라인</span></label>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-card-title">✦ 움직임과 소리</div>
+    <div class="field-group"><span class="label-sub">소리 시각화</span>
+      <div class="seg" data-key="viz"><button data-val="bars">막대</button><button data-val="wave">물결</button><button data-val="peaks">전체 파형</button><button data-val="none">끄기</button></div>
+    </div>
+    <label class="toggle-row"><input type="checkbox" id="fProg" checked><span class="sw-track"></span><span class="toggle-label">진행 바 &amp; 시간 표시</span></label>
+    <label class="toggle-row"><input type="checkbox" id="fMotion" checked><span class="sw-track"></span><span class="toggle-label">은은한 커버 플로팅</span></label>
+    <label class="toggle-row when-audio"><input type="checkbox" id="fReact" checked><span class="sw-track"></span><span class="toggle-label">비트에 맞는 커버 모션</span></label>
+    <label class="toggle-row"><input type="checkbox" id="fGrain" checked><span class="sw-track"></span><span class="toggle-label">필름 그레인</span></label>
+    <div class="two when-noaudio">
+      <div class="field-group"><label class="label-sub" for="fDur">곡 길이</label><input class="text" id="fDur" value="11:03" inputmode="numeric"></div>
+      <div class="field-group"><label class="label-sub" for="fPos">진행 위치</label><div class="range-row" style="height:38px"><input type="range" id="fPos" min="0" max="100" value="49"></div></div>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-card-title">✦ 내보내기</div>
+    <button class="save-btn" id="pngBtn">이미지로 저장하기 <span class="btn-sub">1920×1080</span></button>
+    <div class="panel-divider"></div>
+    <div class="field-group when-noaudio"><label class="label-sub" for="fLoop">반복 영상 길이</label>
+      <div class="range-row"><input type="range" id="fLoop" min="4" max="20" step="1" value="8"><span class="val" id="vLoop">8초</span></div>
+    </div>
+    <div class="field-group when-audio"><span class="label-sub">영상 범위</span>
+      <div class="seg" data-key="range"><button data-val="all">전체 곡</button><button data-val="part">구간 지정</button></div>
+      <div class="two hidden" id="rangeBox">
+        <div class="field-group"><label class="label-sub" for="fStart">시작</label><input class="text" id="fStart" value="0:00" inputmode="numeric"></div>
+        <div class="field-group"><label class="label-sub" for="fEnd">끝</label><input class="text" id="fEnd" value="0:30" inputmode="numeric"></div>
+      </div>
+    </div>
+    <div class="field-group"><span class="label-sub">프레임</span>
+      <div class="seg" data-key="fps"><button data-val="30">30fps</button><button data-val="60">60fps</button></div>
+    </div>
+    <label class="toggle-row when-audio"><input type="checkbox" id="fMute"><span class="sw-track"></span><span class="toggle-label">내보내는 동안 스피커 소리 끄기</span></label>
+    <button class="copy-btn" id="recBtn">영상으로 저장</button>
+    <button class="copy-btn hidden" id="cancelBtn">내보내기 취소</button>
+    <div class="meter hidden" id="meter"><i id="meterBar"></i></div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <p class="note" id="fmtNote"></p>
+  </section>
+</aside>
+
+<main class="stage">
+  <div class="canvas-container" id="dropzone">
+    <canvas id="stage" width="1920" height="1080" aria-label="1920×1080 미리보기"></canvas>
+    <div class="drop-overlay">▶ 파일 첨부하기</div>
+  </div>
+  <div class="stage-bar when-audio">
+    <button class="iconbtn" id="playBtn" aria-label="재생">
+      <svg id="icoPlay" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+      <svg id="icoPause" class="hidden" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>
+    </button>
+    <div class="range-row"><input type="range" id="seek" min="0" max="1000" value="0" aria-label="재생 위치"></div>
+    <span class="time" id="time">0:00 / 0:00</span>
+    <button class="mini-btn" id="audRemove" style="align-self:center">오디오 제거</button>
+  </div>
+  <p class="hint">*미리보기 화면에 파일을 <b>끌어다 놓아도</b> 적용됩니다♡</p>
+</main>
+
+<script>
+(() => {
+const W = 1920, H = 1080;
+const cv = document.getElementById('stage');
+const ctx = cv.getContext('2d');
+const $ = id => document.getElementById(id);
+
+const S = {
+  title:'SONG TITLE', artist:'PURE X UXI', sub:'',
+  layout:'split', bg:'blur', mood:'auto', viz:'bars', font:'Pretendard', deco:'cyber', hud:true, hudBL:'30FPS', hudBLAuto:true, scan:false,
+  radius:18, accentAuto:true, accentHex:'#2389C8',
+  motion:true, react:true, grain:true, progress:true,
+  fakeDur:663, fakePos:328/663, loopLen:8, fps:30,
+  range:'all', rStart:0, rEnd:30, mute:false
+};
+
+/* ---------- helpers ---------- */
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const mk = (w,h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const c = (a, al=1) => `hsla(${(a[0]*360).toFixed(1)},${(a[1]*100).toFixed(1)}%,${(a[2]*100).toFixed(1)}%,${al})`;
+function rgb2hsl(r,g,b){ r/=255;g/=255;b/=255; const mx=Math.max(r,g,b), mn=Math.min(r,g,b); let h=0,s=0,l=(mx+mn)/2;
+  if(mx!==mn){ const d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn);
+    if(mx===r) h=(g-b)/d+(g<b?6:0); else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4; h/=6; }
+  return [h,s,l]; }
+function hsl2hex(a){ const [h,s,l]=a; const f=n=>{ const k=(n+h*12)%12; const v=l-s*Math.min(l,1-l)*Math.max(-1,Math.min(k-3,9-k,1)); return Math.round(v*255).toString(16).padStart(2,'0'); }; return '#'+f(0)+f(8)+f(4); }
+function hex2hsl(hex){ const m=hex.replace('#',''); return rgb2hsl(parseInt(m.slice(0,2),16),parseInt(m.slice(2,4),16),parseInt(m.slice(4,6),16)); }
+const hueDist = (a,b) => { const d=Math.abs(a-b); return Math.min(d,1-d); };
+const fmt = s => { s=Math.max(0,Math.floor(s||0)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
+function parseTime(str){ str=String(str).trim(); if(!str) return NaN; if(str.includes(':')){ const [m,s]=str.split(':'); return (parseInt(m,10)||0)*60+(parseFloat(s)||0); } return parseFloat(str); }
+function rr(x,y,w,h,r){ r=Math.max(0,Math.min(r,w/2,h/2)); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+/* ---------- state ---------- */
+let art = null, blurBg = null, pal = null, TH = null, themeDirty = true;
+let actx = null, analyser = null, monitorGain = null, recDest = null;
+const P = { buf:null, src:null, playing:false, offset:0, startAt:0 };
+let peaks = null, freq = new Uint8Array(1024), wave = new Uint8Array(2048);
+let barVal = new Float32Array(96), bandsFor = 0, bands = [], bassS = 0;
+let loopT0 = performance.now();
+let rec = null, recInfo = null, fontVer = 0;
+
+/* fake waveform for when no song is loaded */
+const fakePeaks = (() => { let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  const raw=[]; for(let i=0;i<220;i++) raw.push(rnd());
+  const out=new Float32Array(220);
+  for(let i=0;i<220;i++){ let s=0,n=0; for(let k=-3;k<=3;k++){ const j=i+k; if(j>=0&&j<220){ s+=raw[j]; n++; } }
+    const env=0.55+0.45*Math.sin(Math.PI*i/220); out[i]=clamp((s/n)*1.3*env,0.08,1); }
+  return out; })();
+
+/* grain */
+const grain = mk(256,256);
+{ const g=grain.getContext('2d'); const id=g.createImageData(256,256);
+  for(let i=0;i<id.data.length;i+=4){ const v=Math.random()*255|0; id.data[i]=id.data[i+1]=id.data[i+2]=v; id.data[i+3]=255; }
+  g.putImageData(id,0,0); }
+const grainPat = ctx.createPattern(grain,'repeat');
+
+/* ---------- cover + palette ---------- */
+/* ---------- animated default cover: riso-style medical poster ---------- */
+const DEMO=1200, TAU=Math.PI*2;
+const PAPER='#eaf4fb', NAVY='#12324a', SKY='#51aae1', MINT='#23D4A0';
+let isDemo=false;
+const demoCv=mk(DEMO,DEMO), dg=demoCv.getContext('2d');
+const paperGrain=(()=>{ const cc=mk(DEMO,DEMO), g=cc.getContext('2d'); const id=g.createImageData(DEMO,DEMO);
+  for(let i=0;i<id.data.length;i+=4){ const v=200+Math.random()*55|0; id.data[i]=id.data[i+1]=id.data[i+2]=v; id.data[i+3]=255; }
+  g.putImageData(id,0,0); return cc; })();
+const fluidDots=(()=>{ const cc=mk(9,9), g=cc.getContext('2d'); g.fillStyle='rgba(255,255,255,0.55)'; g.beginPath(); g.arc(4.5,4.5,1.6,0,TAU); g.fill(); return dg.createPattern(cc,'repeat'); })();
+const LATIN='"Inter Tight", "Pretendard", "Noto Sans KR", sans-serif';
+function rrd(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+function dFont(g,w,size,track){ g.font=`${w} ${size}px ${LATIN}`; if('letterSpacing' in g) g.letterSpacing=(track||0)+'px'; }
+
+function halftoneDisc(g,cx,cy,r,ph){
+  const sp=22, ang=0.26, ca=Math.cos(ang), sa=Math.sin(ang), n=Math.ceil(r/sp)+1;
+  g.save(); g.globalCompositeOperation='multiply'; g.fillStyle=SKY;
+  g.beginPath(); g.arc(cx,cy,r,0,TAU); g.clip();
+  for(let i=-n;i<=n;i++) for(let j=-n;j<=n;j++){
+    const lx=i*sp, ly=j*sp, x=cx+lx*ca-ly*sa, y=cy+lx*sa+ly*ca;
+    const dx=(x-cx)/r, dy=(y-cy)/r, dist=Math.hypot(dx,dy); if(dist>1.04) continue;
+    const shade=0.3+0.7*((dx*-0.45+dy*0.9)*0.5+0.5);
+    const rip=0.78+0.22*Math.sin(dist*r/30-ph*3);
+    const rad=sp*0.56*clamp(shade,0.08,1)*rip; if(rad<0.6) continue;
+    g.beginPath(); g.arc(x,y,rad,0,TAU); g.fill();
+  }
+  g.restore();
+}
+function syringe(g,fh,shadow){
+  const F=c=>shadow?NAVY:c;
+  g.fillStyle=F(NAVY); g.beginPath(); g.moveTo(60,-14); g.lineTo(63.2,4); g.lineTo(63.2,62); g.lineTo(56.8,62); g.lineTo(56.8,4); g.closePath(); g.fill();
+  g.fillStyle=F(SKY); rrd(g,45,56,30,20,3); g.fill();
+  g.fillStyle=F(NAVY); rrd(g,30,74,60,13,3); g.fill();
+  g.fillStyle=F('#ffffff'); rrd(g,35,86,50,266,6); g.fill();
+  if(!shadow){
+    g.fillStyle=MINT; g.fillRect(39,90,42,fh); g.fillStyle=fluidDots; g.fillRect(39,90,42,fh);
+    g.fillStyle='rgba(255,255,255,0.7)'; g.fillRect(44,96,5,Math.max(0,fh-14));
+    g.fillStyle=NAVY; for(let y=112;y<=340;y+=19){ g.fillRect(68,y,(Math.round(y/19)%2)?13:8,3); }
+    g.fillStyle=NAVY; g.fillRect(39,90+fh,42,12);
+  }
+  g.fillStyle=F('#ffffff'); g.fillRect(54.5,102+fh,11,124);
+  g.fillStyle=F('#ffffff'); rrd(g,28,224+fh,64,15,4); g.fill();
+  if(!shadow){ g.fillStyle=SKY; g.fillRect(36,229+fh,48,5); }
+}
+function flatPill(g,x,y,len,w,rot,colA){
+  g.save(); g.translate(x,y); g.rotate(rot);
+  g.save(); g.rotate(-rot); g.translate(9,9); g.rotate(rot); rrd(g,-len/2,-w/2,len,w,w/2); g.fillStyle=NAVY; g.fill(); g.restore();
+  rrd(g,-len/2,-w/2,len,w,w/2); g.fillStyle='#ffffff'; g.fill();
+  g.save(); rrd(g,-len/2,-w/2,len,w,w/2); g.clip(); g.fillStyle=colA; g.fillRect(-len/2,-w/2,len/2,w);
+  g.fillStyle='rgba(255,255,255,0.5)'; g.fillRect(-len/2+w*0.4,-w*0.3,len*0.32,w*0.13); g.restore();
+  g.restore();
+}
+function drawDemo(ph){
+  const g=dg, u=((ph/TAU)%1+1)%1;
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.globalCompositeOperation='source-over';
+  g.fillStyle=PAPER; g.fillRect(0,0,DEMO,DEMO);
+
+  halftoneDisc(g,800,420,410,ph);
+
+  /* giant type with riso misregistration */
+  const targetWord = 'DOSE';
+  const targetWidth = 1108;
+
+  dFont(g, 700, 400, -22); g.textBaseline = 'alphabetic'; g.textAlign = 'left';
+  const dw = g.measureText(targetWord).width;
+  // 목표 가로 폭(1108)에 딱 맞도록 폰트 크기를 비례 계산하여 재설정
+  const fitSize = Math.floor(400 * (targetWidth / dw));
+  dFont(g, 700, fitSize, -22);
+
+  const mx = 7 + 3 * Math.sin(ph * 2), my = 5 + 2 * Math.cos(ph * 2);
+  g.save(); g.globalCompositeOperation = 'multiply'; g.fillStyle = MINT; 
+  g.fillText(targetWord, 46 + mx, 1088 + my); 
+  g.restore();
+  g.fillStyle = NAVY; 
+  g.fillText(targetWord, 46, 1088);
+
+  /* fine print */
+  dFont(g,700,170,-6); g.textBaseline='top'; g.fillStyle=NAVY; g.fillText('Rx',58,44);
+  g.fillRect(64,232,230,5);
+  dFont(g,700,27,1.5); g.fillText('PURE×UXI',64,252); g.fillText('[ Love Disorder ]',64,286);
+  g.save(); g.translate(46,640); g.rotate(-Math.PI/2); dFont(g,700,17,4); g.textAlign='center'; g.textBaseline='middle';
+  g.fillStyle='rgba(18,50,74,0.8)'; g.fillText('TAKE ONE TRACK DAILY   ✦   DO NOT EXCEED VOLUME',0,0); g.restore();
+
+  /* pills tumbling */
+  flatPill(g,292,560+Math.sin(ph)*16,170,64,0.5+Math.sin(ph)*0.35,MINT);
+  flatPill(g,1075,655+Math.sin(ph+2)*14,130,50,-0.9+Math.sin(ph*2+1)*0.25,SKY);
+
+  /* syringe with a hard print shadow */
+  const p=0.5-0.5*Math.cos(ph*2), fh=160-p*62, rot=0.78+0.03*Math.sin(ph), k=2.8, cx=560, cy=610;
+  for(const sh of [true,false]){
+    g.save(); g.translate(cx+(sh?16:0),cy+(sh?16:0)); g.rotate(rot); g.scale(k,k); g.translate(-60,-230);
+    syringe(g,fh,sh); g.restore();
+  }
+  /* droplet */
+  const tx=cx+244*k*Math.sin(rot), ty=cy-244*k*Math.cos(rot), q=((u*2)%1);
+  if(q>0.3 && q<0.95){
+    let r, y=ty+8, al=1;
+    if(q<0.55) r=20*(q-0.3)/0.25; else { r=20; const f=(q-0.55)/0.4; y=ty+8+f*f*560; al=1-Math.max(0,(f-0.75)/0.25); }
+    g.globalAlpha=al; g.fillStyle=MINT;
+    g.beginPath(); g.moveTo(tx,y-r*1.9); g.quadraticCurveTo(tx+r*1.05,y-r*0.2,tx,y+r); g.quadraticCurveTo(tx-r*1.05,y-r*0.2,tx,y-r*1.9); g.fill();
+    g.globalAlpha=1;
+  }
+
+  /* marquee band */
+  g.fillStyle=NAVY; g.fillRect(0,1112,DEMO,88);
+  dFont(g,700,34,3); g.textBaseline='middle'; g.textAlign='left';
+  const word='LISTEN AS PRESCRIBED', gap=34, ww=g.measureText(word).width, sw=30, unit=ww+gap*2+sw;
+  const off=((u*3)%1)*unit;
+  for(let x=-off; x<DEMO; x+=unit){
+    g.fillStyle='#ffffff'; g.fillText(word,x,1157);
+    g.fillStyle=MINT; g.save(); g.translate(x+ww+gap+sw/2,1156); g.beginPath();
+    g.moveTo(0,-15); g.quadraticCurveTo(0,0,15,0); g.quadraticCurveTo(0,0,0,15); g.quadraticCurveTo(0,0,-15,0); g.quadraticCurveTo(0,0,0,-15); g.fill(); g.restore();
+  }
+
+  /* paper texture */
+  g.save(); g.globalCompositeOperation='multiply'; g.globalAlpha=0.16; g.drawImage(paperGrain,0,0); g.restore();
+  if('letterSpacing' in g) g.letterSpacing='0px';
+}
+function useDemo(){
+  isDemo=true; drawDemo(0); art=demoCv; pal=extractPalette(demoCv);
+  const sky=rgb2hsl(81,170,225); pal.vibrant={h:sky[0],s:sky[1],l:sky[2],n:0.2}; pal.mono=false;
+  blurBg=buildBlur(demoCv); themeDirty=true;
+  document.body.classList.remove('has-cover');
+}
+function setArt(src){
+  const sw=src.naturalWidth||src.width, sh=src.naturalHeight||src.height, s=Math.min(sw,sh);
+  const size=Math.min(1600, Math.max(800, s));
+  const cc=mk(size,size), g=cc.getContext('2d'); g.imageSmoothingQuality='high';
+  g.drawImage(src,(sw-s)/2,(sh-s)/2,s,s,0,0,size,size);
+  isDemo=false; document.body.classList.add('has-cover');
+  art=cc; pal=extractPalette(cc); blurBg=buildBlur(cc); themeDirty=true;
+}
+function extractPalette(src){
+  const n=56, cc=mk(n,n), g=cc.getContext('2d',{willReadFrequently:true});
+  g.drawImage(src,0,0,n,n); const d=g.getImageData(0,0,n,n).data;
+  const map=new Map(); let L=0, cnt=0;
+  for(let i=0;i<d.length;i+=4){ const r=d[i],gg=d[i+1],b=d[i+2];
+    L+=(0.2126*r+0.7152*gg+0.0722*b)/255; cnt++;
+    const k=(r>>4)<<8|(gg>>4)<<4|(b>>4); let e=map.get(k); if(!e){ e={r:0,g:0,b:0,n:0}; map.set(k,e); }
+    e.r+=r; e.g+=gg; e.b+=b; e.n++; }
+  const list=[...map.values()].map(e=>{ const h=rgb2hsl(e.r/e.n,e.g/e.n,e.b/e.n); return {h:h[0],s:h[1],l:h[2],n:e.n/cnt}; }).sort((a,b)=>b.n-a.n);
+  const dominant=list[0];
+  let vib=null, best=-1;
+  for(const x of list){ if(x.n<0.004) continue; const sc=x.s*(1-Math.abs(x.l-0.52)*1.6)*Math.pow(x.n,0.25); if(sc>best){ best=sc; vib=x; } }
+  if(!vib) vib=dominant;
+  const mono = vib.s<0.14;
+  const secondary = list.find(x=>x.n>0.01 && x.s>0.15 && hueDist(x.h,vib.h)>0.08) || vib;
+  return { dominant, vibrant:vib, secondary, avgL:L/cnt, mono };
+}
+function buildBlur(src){
+  let cur=src;
+  for(const s of [18,72,288]){ const cc=mk(s,s), g=cc.getContext('2d'); g.imageSmoothingEnabled=true; g.imageSmoothingQuality='high'; g.drawImage(cur,0,0,s,s); cur=cc; }
+  const out=mk(1100,1100), g=out.getContext('2d'); g.imageSmoothingQuality='high';
+  if('filter' in g) g.filter='blur(22px)';
+  g.drawImage(cur,-70,-70,1240,1240);
+  return out;
+}
+function computeTheme(){
+  const p=pal, d=p.dominant, v=p.vibrant, s2=p.secondary;
+  const dark = S.mood==='dark' || (S.mood==='auto' && p.avgL<0.58);
+  const T={dark};
+  T.base = dark ? [d.h, Math.min(d.s,0.5)*0.8, 0.11] : [d.h, Math.min(d.s,0.35)*0.7, 0.93];
+  T.b2   = dark ? [v.h, Math.min(v.s,0.65), 0.30] : [v.h, Math.min(v.s,0.6), 0.80];
+  T.b3   = dark ? [s2.h, Math.min(s2.s,0.55), 0.22] : [s2.h, Math.min(s2.s,0.5), 0.86];
+  let acc;
+  if(!S.accentAuto) acc=hex2hsl(S.accentHex);
+  else { const sat = p.mono ? Math.min(v.s,0.1) : clamp(v.s,0.45,0.85);
+    acc = dark ? [v.h,sat,clamp(v.l,0.62,0.74)] : [v.h,sat,clamp(v.l,0.36,0.46)]; }
+  T.acc=acc;
+  T.ink = dark ? [d.h,0.12,0.96] : [d.h,0.22,0.11];
+  T.uiL=[acc[0],acc[1],clamp(acc[2],0.34,0.45)];
+  T.uiD=[acc[0],acc[1],clamp(acc[2],0.62,0.72)];
+  return T;
+}
+function applyUiAccent(){
+  if(S.accentAuto){ 
+    $('fAcc').value = hsl2hex(TH.acc); 
+    $('accHex').value = $('fAcc').value.toUpperCase(); 
+  }
+}
+
+/* ---------- text layout ---------- */
+function setFont(w,size,title){
+  let fallback = '"Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+  if(S.font === 'Noto Serif KR') fallback = '"Batang", "AppleMyungjo", serif';
+  else if(S.font === 'NeoDunggeunmo' || S.font === 'JetBrains Mono') fallback = 'ui-monospace, monospace';
+  else if(S.font === 'KOTRA_SONGEULSSI') fallback = '"Apple SD Gothic Neo", sans-serif';
+
+  const weight = (S.font === 'NeoDunggeunmo' || S.font === 'KOTRA_SONGEULSSI') ? 'normal' : w;
+  ctx.font = `${weight} ${size}px "${S.font}", ${fallback}`;
+
+  if('letterSpacing' in ctx) {
+    ctx.letterSpacing = title 
+      ? (-size * 0.04).toFixed(2) + 'px' 
+      : (w >= 500 
+          ? (-size * 0.03).toFixed(2) + 'px'
+          : (-size * 0.02).toFixed(2) + 'px');
+  }
+}
+function wrap(text,maxW){
+  const out=[]; let cur='';
+  for(const wd of text.split(' ')){
+    const test=cur?cur+' '+wd:wd;
+    if(ctx.measureText(test).width<=maxW){ cur=test; continue; }
+    if(cur){ out.push(cur); cur=''; }
+    if(ctx.measureText(wd).width<=maxW){ cur=wd; }
+    else { let piece=''; for(const ch of wd){ if(piece && ctx.measureText(piece+ch).width>maxW){ out.push(piece); piece=ch; } else piece+=ch; } cur=piece; }
+  }
+  out.push(cur); return out;
+}
+function fit(text,w,size,min,maxW,maxLines,title){
+  for(let sz=size; sz>=min; sz-=2){ setFont(w,sz,title); const ls=wrap(text,maxW); if(ls.length<=maxLines) return {lines:ls,size:sz,w,title}; }
+  setFont(w,min,title); const ls=wrap(text,maxW).slice(0,maxLines); let last=ls[ls.length-1];
+  while(last.length>1 && ctx.measureText(last+'…').width>maxW) last=last.slice(0,-1);
+  ls[ls.length-1]=last.trimEnd()+'…'; return {lines:ls,size:min,w,title};
+}
+function layout(){
+  if(S.layout==='center') return { art:{x:(W-480)/2,y:84,s:480},
+    text:{x:W/2,w:1100,align:'center',cy:800,ts:62,tmin:40,lines:1,as:30,ss:22,vizW:880,vizH:76,gapViz:40,bars:64} };
+  if(S.layout==='vinyl'){ const s=580,x=150,y=(H-s)/2,R=280,cx=x+s-R+235,cy=H/2, tx=cx+R+110;
+    return { art:{x,y,s}, vinyl:{cx,cy,R}, text:{x:tx,w:W-tx-150,align:'left',cy:H/2,ts:70,tmin:46,lines:2,as:32,ss:22,vizH:96,bars:44} }; }
+  const s=620,x=170,y=(H-s)/2, tx=x+s+120;
+  return { art:{x,y,s}, text:{x:tx,w:W-tx-170,align:'left',cy:H/2,ts:78,tmin:50,lines:2,as:34,ss:24,vizH:110,bars:48} };
+}
+let stackKey='', stackVal=null;
+function getStack(tc){
+  const key=[S.title,S.artist,S.sub,S.font,S.layout,S.viz,S.progress,fontVer].join('|');
+  if(key===stackKey) return stackVal;
+  ctx.save();
+  const t=fit(S.title||' ',700,tc.ts,tc.tmin,tc.w,tc.lines,true);
+  const a=S.artist?fit(S.artist,500,tc.as,Math.round(tc.as*0.75),tc.w,1,false):null;
+  const s=S.sub?fit(S.sub,400,tc.ss,Math.round(tc.ss*0.8),tc.w,1,false):null;
+  ctx.restore();
+  const items=[]; let y=0;
+  items.push({k:'title',y,...t}); y+=t.lines.length*t.size*1.16;
+  if(a){ y+=t.size*0.26; items.push({k:'artist',y,...a}); y+=a.size*1.3; }
+  if(s){ y+=8; items.push({k:'sub',y,...s}); y+=s.size*1.35; }
+  if(S.viz!=='none'){ y+=tc.gapViz||52; items.push({k:'viz',y,h:tc.vizH}); y+=tc.vizH; }
+  if(S.progress){ y+=S.viz!=='none'?26:(S.layout==='center'?36:48); items.push({k:'prog',y}); y+=44; }
+  const top = tc.top!=null ? tc.top : tc.cy - y/2;
+  stackKey=key; stackVal={items,top}; return stackVal;
+}
+
+/* ---------- drawing ---------- */
+function blob(col,x,y,r,a){ const g=ctx.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,c(col,a)); g.addColorStop(1,c(col,0)); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }
+function drawBg(T,ph,lay){
+  ctx.fillStyle=c(T.base); ctx.fillRect(0,0,W,H);
+  if(S.bg==='blur'){
+    const sc=2200*(1+0.035*Math.sin(ph)), dx=28*Math.cos(ph), dy=18*Math.sin(ph*2);
+    ctx.drawImage(blurBg,W/2-sc/2+dx,H/2-sc/2+dy,sc,sc);
+    ctx.fillStyle=c(T.base,T.dark?0.5:0.52); ctx.fillRect(0,0,W,H);
+  } else if(S.bg==='gradient'){
+    blob(T.b2, W*(0.24+0.05*Math.sin(ph)), H*(0.30+0.08*Math.cos(ph)), 1000, 0.9);
+    blob(T.b3, W*(0.80+0.04*Math.cos(ph)), H*(0.78+0.06*Math.sin(ph*2)), 1050, 0.85);
+    blob(T.acc, W*(0.62+0.06*Math.sin(ph+1.3)), H*(0.18+0.05*Math.cos(ph+0.4)), 720, T.dark?0.22:0.28);
+  } else {
+    const a=lay.art; blob(T.b2, a.x+a.s/2, a.y+a.s/2, 1100, T.dark?0.38:0.45);
+  }
+  const vg=ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*1.05);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,T.dark?'rgba(0,0,0,0.38)':'rgba(0,0,0,0.06)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+function drawArt(T,x,y,s,scale){
+  const r=S.radius*s/640, cx=x+s/2, cy=y+s/2;
+  ctx.save(); ctx.translate(cx,cy); ctx.scale(scale,scale); ctx.translate(-cx,-cy);
+  ctx.shadowColor = T.dark ? 'rgba(0,0,0,0.5)' : c([T.base[0],0.3,0.2],0.3);
+  ctx.shadowBlur=90; ctx.shadowOffsetY=34;
+  rr(x,y,s,s,r); ctx.fillStyle=c(T.base); ctx.fill();
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+  rr(x,y,s,s,r); ctx.clip(); ctx.drawImage(art,x,y,s,s);
+  ctx.restore();
+}
+function drawVinyl(T,cx,cy,R,ang){
+  ctx.save(); ctx.translate(cx,cy);
+  ctx.shadowColor=T.dark?'rgba(0,0,0,0.55)':'rgba(0,0,0,0.28)'; ctx.shadowBlur=70; ctx.shadowOffsetY=26;
+  ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fillStyle='#0e0f11'; ctx.fill();
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+  ctx.lineWidth=1; ctx.strokeStyle='rgba(255,255,255,0.045)';
+  for(let r=R*0.37;r<R*0.97;r+=5){ ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.stroke(); }
+  if(ctx.createConicGradient){
+    const g=ctx.createConicGradient(-0.6,0,0);
+    g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(0.07,'rgba(255,255,255,0.11)'); g.addColorStop(0.14,'rgba(255,255,255,0)');
+    g.addColorStop(0.5,'rgba(255,255,255,0)'); g.addColorStop(0.57,'rgba(255,255,255,0.08)'); g.addColorStop(0.64,'rgba(255,255,255,0)'); g.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+  }
+  ctx.rotate(ang);
+  const lr=R*0.34; ctx.save(); ctx.beginPath(); ctx.arc(0,0,lr,0,Math.PI*2); ctx.clip();
+  ctx.drawImage(art,-lr,-lr,lr*2,lr*2); ctx.restore();
+  ctx.beginPath(); ctx.arc(0,0,lr,0,Math.PI*2); ctx.strokeStyle='rgba(0,0,0,0.35)'; ctx.lineWidth=3; ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,9,0,Math.PI*2); ctx.fillStyle=c(T.base); ctx.fill();
+  ctx.restore();
+}
+function ensureBands(n){
+  if(bandsFor===n || !actx) return; bandsFor=n; bands=[];
+  const bin=actx.sampleRate/analyser.fftSize, f0=35, f1=16000;
+  for(let i=0;i<n;i++){ const a=f0*Math.pow(f1/f0,i/n), b=f0*Math.pow(f1/f0,(i+1)/n);
+    let lo=Math.floor(a/bin), hi=Math.max(lo+1,Math.ceil(b/bin)); bands.push([lo,Math.min(hi,freq.length)]); }
+}
+function updateBars(n){
+  ensureBands(n);
+  for(let i=0;i<n;i++){ const [lo,hi]=bands[i]; let s=0; for(let j=lo;j<hi;j++) s+=freq[j];
+    let v=s/Math.max(1,hi-lo)/255; v=Math.min(1,Math.pow(v,1.7)*(1+i/n*0.7)*1.12);
+    barVal[i]=Math.max(v,barVal[i]-0.03*FS); }
+}
+function vizBars(x,y,w,h,T,ph,live,n){
+  const gap=w/n, bw=Math.max(3,gap*0.32), mid=y+h/2, hs=h*0.68; ctx.fillStyle=c(T.acc);
+  for(let i=0;i<n;i++){
+    let v;
+    if(live) v=barVal[i];
+    else v=0.14+0.34*(0.5+0.5*Math.sin(ph*2+i*0.55))*(0.6+0.4*Math.sin(ph*3-i*0.21))+0.28*Math.pow(0.5+0.5*Math.sin(ph+i*0.13),3);
+    const bh=Math.max(bw,v*hs); rr(x+i*gap+(gap-bw)/2,mid-bh/2,bw,bh,bw/2); ctx.fill();
+  }
+}
+function vizWave(x,y,w,h,T,ph,live){
+  const N=140, mid=y+h/2, pts=[];
+  for(let i=0;i<=N;i++){
+    const u=i/N, taper=Math.pow(Math.sin(Math.PI*u),0.7); let v;
+    if(live){ const base=Math.floor(u*(wave.length/2-4)); let s=0; for(let k=0;k<4;k++) s+=wave[base+k]; v=((s/4)-128)/128*2.2; }
+    else v=0.55*Math.sin(u*Math.PI*6+ph*2)*Math.sin(u*Math.PI*2+ph)+0.22*Math.sin(u*Math.PI*17-ph*3);
+    pts.push([x+u*w, mid+clamp(v,-1,1)*taper*h/2]);
+  }
+  ctx.strokeStyle=c(T.ink,0.12); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,mid); ctx.lineTo(x+w,mid); ctx.stroke();
+  ctx.strokeStyle=c(T.acc); ctx.lineWidth=4; ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length-1;i++){ const mx=(pts[i][0]+pts[i+1][0])/2, my=(pts[i][1]+pts[i+1][1])/2; ctx.quadraticCurveTo(pts[i][0],pts[i][1],mx,my); }
+  ctx.lineTo(pts[N][0],pts[N][1]); ctx.stroke();
+}
+function vizPeaks(x,y,w,h,T,prog){
+  const arr=peaks||fakePeaks, n=Math.round(w/9), gap=w/n, bw=4, mid=y+h/2;
+  for(let i=0;i<n;i++){ const v=arr[Math.floor(i/n*arr.length)], bh=Math.max(bw,v*h);
+    ctx.fillStyle = (i+0.5)/n<=prog ? c(T.acc) : c(T.ink,0.18);
+    rr(x+i*gap+(gap-bw)/2,mid-bh/2,bw,bh,bw/2); ctx.fill(); }
+}
+function drawProg(x,y,w,T,pos,dur){
+  ctx.fillStyle=c(T.ink,0.16); rr(x,y,w,5,2.5); ctx.fill();
+  ctx.fillStyle=c(T.acc); rr(x,y,Math.max(5,w*pos),5,2.5); ctx.fill();
+  setFont(500,22,false); ctx.textBaseline='top'; ctx.fillStyle=c(T.ink,0.6);
+  ctx.textAlign='left'; ctx.fillText(fmt(pos*dur),x,y+18);
+  ctx.textAlign='right'; ctx.fillText(fmt(dur),x+w,y+18);
+}
+
+/* ---------- cyber decoration ---------- */
+const MONO='"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+function hudFont(size,w){ ctx.font=`${w||500} ${size}px "${S.font}", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`; if('letterSpacing' in ctx) ctx.letterSpacing=(size*0.06).toFixed(1)+'px'; }
+function patFrom(w,h,fn){ const g=mk(w,h); fn(g.getContext('2d')); return ctx.createPattern(g,'repeat'); }
+const dotW=patFrom(40,40,x=>{ x.fillStyle='#fff'; x.fillRect(19,19,2,2); });
+const dotK=patFrom(40,40,x=>{ x.fillStyle='#000'; x.fillRect(19,19,2,2); });
+const scanPat=patFrom(4,4,x=>{ x.fillStyle='#000'; x.fillRect(0,0,4,1); });
+const tc=s=>{ s=Math.max(0,s||0); const f=Math.floor((s%1)*30), x=Math.floor(s); const p=n=>String(n).padStart(2,'0'); return p(Math.floor(x/3600))+':'+p(Math.floor(x/60)%60)+':'+p(x%60)+':'+p(f); };
+function bracket(x,y,dx,dy,len){ ctx.beginPath(); ctx.moveTo(x+dx*len,y); ctx.lineTo(x,y); ctx.lineTo(x,y+dy*len); ctx.stroke(); }
+function line(x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+function drawGrid(T){ ctx.save(); ctx.globalAlpha=T.dark?0.08:0.1; ctx.fillStyle=T.dark?dotW:dotK; ctx.fillRect(0,0,W,H); ctx.restore(); }
+
+function drawDeco(T,ph,lay,fy,live,t,pos){
+  if(S.deco==='none') return;
+  const m=44, L=72, acc=c(T.acc), cyber=S.deco==='cyber';
+  ctx.save(); ctx.lineCap='square'; if('letterSpacing' in ctx) ctx.letterSpacing='0px';
+  /* frame lines between the corner brackets */
+  ctx.strokeStyle=c(T.ink,0.2); ctx.lineWidth=1.5;
+  line(m+L+18,m,W-m-L-18,m); line(m+L+18,H-m,W-m-L-18,H-m);
+  line(m,m+L+18,m,H-m-L-18); line(W-m,m+L+18,W-m,H-m-L-18);
+  /* corner brackets */
+  ctx.strokeStyle=acc; ctx.lineWidth=3;
+  if(cyber){ ctx.shadowColor=acc; ctx.shadowBlur=16; }
+  bracket(m,m,1,1,L); bracket(W-m,m,-1,1,L); bracket(m,H-m,1,-1,L); bracket(W-m,H-m,-1,-1,L);
+  ctx.shadowBlur=0;
+  if(!cyber){ ctx.restore(); return; }
+
+  /* rulers */
+  ctx.strokeStyle=c(T.ink,0.32); ctx.lineWidth=1.5;
+  const rw=560, rx=W/2-rw/2;
+  for(let i=0;i<=rw;i+=14){ const big=(i/14)%5===0, h=big?14:7; line(rx+i,m+7,rx+i,m+7+h); line(rx+i,H-m-7,rx+i,H-m-7-h); }
+  ctx.strokeStyle=acc; ctx.lineWidth=2.5; line(W/2,m+7,W/2,m+27); line(W/2,H-m-7,W/2,H-m-27);
+  ctx.strokeStyle=c(T.ink,0.32); ctx.lineWidth=1.5;
+  for(let j=-7;j<=7;j++){ const big=j%3===0; line(m+7,H/2+j*16,m+7+(big?14:7),H/2+j*16); }
+
+  /* level meter on the right edge */
+  const segs=14, sh=12, sg=5, mh=segs*(sh+sg)-sg, mx=W-m-26, my=H/2-mh/2;
+  let lvl = live ? clamp(bassS*1.25,0,1) : (S.motion ? 0.3+0.45*(0.5+0.5*Math.sin(ph*3))*(0.6+0.4*Math.sin(ph*5)) : 0.55);
+  const on=Math.round(lvl*segs);
+  for(let k=0;k<segs;k++){ const y=my+mh-(k+1)*(sh+sg)+sg; ctx.fillStyle=k<on?acc:c(T.ink,0.13); ctx.fillRect(mx,y,10,sh); }
+
+  /* reticle around the cover */
+  const a=lay.art, o=24, rl=30, ax=a.x-o, ay=a.y+fy-o, as=a.s+o*2;
+  ctx.strokeStyle=acc; ctx.lineWidth=2; ctx.shadowColor=acc; ctx.shadowBlur=10;
+  bracket(ax,ay,1,1,rl); bracket(ax+as,ay,-1,1,rl); bracket(ax,ay+as,1,-1,rl); bracket(ax+as,ay+as,-1,-1,rl);
+  ctx.shadowBlur=0; ctx.strokeStyle=c(T.ink,0.35); ctx.lineWidth=1.5;
+  line(a.x+a.s/2,ay-8,a.x+a.s/2,ay+6); line(a.x+a.s/2,ay+as-6,a.x+a.s/2,ay+as+8);
+  line(ax-8,a.y+fy+a.s/2,ax+6,a.y+fy+a.s/2); line(ax+as-6,a.y+fy+a.s/2,ax+as+8,a.y+fy+a.s/2);
+
+  /* HUD text */
+  if(S.hud){
+    const ty=m+32, by=H-m-32; hudFont(16,600); ctx.textBaseline='middle';
+    const blink=!S.motion || Math.sin(ph*4)>-0.35;
+    if(blink){ ctx.fillStyle=acc; ctx.shadowColor=acc; ctx.shadowBlur=10; ctx.beginPath(); ctx.arc(m+30,ty,5,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; }
+    ctx.textAlign='left'; ctx.fillStyle=c(T.ink,0.82); ctx.fillText('NOW PLAYING',m+46,ty);
+    ctx.textAlign='right'; ctx.fillStyle=acc; ctx.fillText(tc(t),W-m-24,ty);
+    hudFont(15,500);
+    if('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    ctx.fillStyle=c(T.ink,0.5);
+    ctx.textAlign='left'; if(S.hudBL) ctx.fillText(S.hudBL,m+24,by);
+    ctx.textAlign='right'; ctx.fillText(String(Math.round(pos*100)).padStart(3,'0')+'%',W-m-24,by);
+  }
+
+  /* slow sweep line */
+  if(S.motion){
+    const u=((ph/(2*Math.PI))%1+1)%1, sy=u*(H+240)-120;
+    const lg=ctx.createLinearGradient(0,sy-130,0,sy); lg.addColorStop(0,c(T.acc,0)); lg.addColorStop(1,c(T.acc,T.dark?0.07:0.06));
+    ctx.fillStyle=lg; ctx.fillRect(0,sy-130,W,130);
+    ctx.fillStyle=c(T.acc,T.dark?0.3:0.22); ctx.fillRect(0,sy,W,1.5);
+  }
+  ctx.restore();
+}
+
+function ptime(){ if(!P.buf) return 0; return P.playing ? Math.min(P.buf.duration, actx.currentTime-P.startAt) : P.offset; }
+
+function render(now,ov){
+  if(themeDirty){ TH=computeTheme(); themeDirty=false; applyUiAccent(); }
+  const T=TH, live=!!P.buf, lay=layout(), tc=lay.text;
+  let ph, ang, t=0;
+  if(live){ t=ov?ov.t:ptime(); ph=t*2*Math.PI/8; ang=t*2*Math.PI/1.8; }
+  else { const L=S.loopLen; const lt=ov?(ov.t%L):(((now-loopT0)/1000)%L+L)%L; ph=lt/L*2*Math.PI; ang=ph*Math.max(1,Math.round(L/1.8)); }
+  if(!S.motion){ ph=0; ang=0; }
+  if(isDemo) drawDemo(ph);
+  if(live && analyser){
+    if(!ov){ analyser.getByteFrequencyData(freq); analyser.getByteTimeDomainData(wave); }
+    updateBars(tc.bars);
+    let s=0; for(let i=1;i<8;i++) s+=freq[i]; bassS=Math.max(s/7/255, bassS*Math.pow(0.9,FS));
+  }
+  ctx.save();
+  ctx.letterSpacing && (ctx.letterSpacing='0px');
+  drawBg(T,ph,lay);
+  if(S.deco==='cyber') drawGrid(T);
+  const a=lay.art, fy=Math.sin(ph)*6;
+  const sc=(live && S.react && (P.playing||ov)) ? 1+Math.pow(bassS,2.5)*0.03 : 1;
+  if(lay.vinyl) drawVinyl(T,lay.vinyl.cx,lay.vinyl.cy+fy,lay.vinyl.R,ang);
+  drawArt(T,a.x,a.y+fy,a.s,sc);
+
+  const st=getStack(tc), center=tc.align==='center';
+  const vw=tc.vizW||Math.min(tc.w,720), vx=center?tc.x-vw/2:tc.x;
+  const pos = live ? (P.buf.duration ? t/P.buf.duration : 0) : S.fakePos;
+  const dur = live ? P.buf.duration : S.fakeDur;
+  ctx.textAlign=center?'center':'left'; ctx.textBaseline='top';
+  for(const it of st.items){
+    const y=st.top+it.y;
+    if(it.k==='title'||it.k==='artist'||it.k==='sub'){
+      setFont(it.w,it.size,it.title); ctx.textAlign=center?'center':'left'; ctx.textBaseline='top';
+      ctx.fillStyle = it.k==='title' ? c(T.ink) : it.k==='artist' ? c(T.ink,0.72) : c(T.ink,0.5);
+      it.lines.forEach((ln,i)=>ctx.fillText(ln,tc.x,y+i*it.size*1.16));
+    } else if(it.k==='viz'){
+      if(S.viz==='bars') vizBars(vx,y,vw,it.h,T,ph,live,tc.bars);
+      else if(S.viz==='wave') vizWave(vx,y,vw,it.h,T,ph,live);
+      else if(S.viz==='peaks') vizPeaks(vx,y,vw,it.h,T,pos);
+    } else if(it.k==='prog'){
+      drawProg(vx,y,vw,T,pos,dur);
+    }
+  }
+  const hudT = live ? t : S.fakePos*S.fakeDur;
+  drawDeco(T,ph,lay,fy,live,hudT,pos);
+  if(S.deco==='cyber' && S.scan){ ctx.save(); ctx.globalAlpha=T.dark?0.2:0.07; ctx.fillStyle=scanPat; ctx.fillRect(0,0,W,H); ctx.restore(); }
+  if(S.grain){ ctx.globalAlpha=0.06; ctx.globalCompositeOperation='overlay'; ctx.fillStyle=grainPat; ctx.fillRect(0,0,W,H); }
+  ctx.restore();
+}
+
+/* ---------- audio ---------- */
+function ensureAudioCtx(){
+  if(actx) return;
+  actx=new (window.AudioContext||window.webkitAudioContext)();
+  analyser=actx.createAnalyser(); analyser.fftSize=2048; analyser.smoothingTimeConstant=0.75;
+  monitorGain=actx.createGain(); recDest=actx.createMediaStreamDestination();
+  analyser.connect(monitorGain); monitorGain.connect(actx.destination);
+  freq=new Uint8Array(analyser.frequencyBinCount); wave=new Uint8Array(analyser.fftSize);
+}
+function stopSrc(){ if(P.src){ const s=P.src; P.src=null; s.onended=null; try{ s.stop(); }catch(e){} s.disconnect(); } }
+function play(from){
+  stopSrc(); const s=actx.createBufferSource(); s.buffer=P.buf;
+  s.connect(analyser); s.connect(recDest);
+  s.onended=()=>{ if(P.src===s){ P.src=null; P.playing=false; P.offset=P.buf.duration; syncPlayIcon(); } };
+  P.startAt=actx.currentTime-from; s.start(0,from); P.src=s; P.playing=true; syncPlayIcon();
+}
+function pause(){ if(!P.buf) return; P.offset=ptime(); stopSrc(); P.playing=false; syncPlayIcon(); }
+function seekTo(t){ t=clamp(t,0,P.buf.duration); if(P.playing) play(t); else P.offset=t; }
+function syncPlayIcon(){ $('icoPlay').classList.toggle('hidden',P.playing); $('icoPause').classList.toggle('hidden',!P.playing); $('playBtn').setAttribute('aria-label',P.playing?'일시정지':'재생'); }
+function computePeaks(buf,n){
+  const a=buf.getChannelData(0), b=buf.numberOfChannels>1?buf.getChannelData(1):null;
+  const step=Math.floor(a.length/n), out=new Float32Array(n); let mx=0;
+  for(let i=0;i<n;i++){ let s=0,k=0; for(let j=0;j<step;j+=16){ const idx=i*step+j; const v=Math.abs(a[idx])+(b?Math.abs(b[idx]):0); s+=v*v; k++; }
+    out[i]=Math.sqrt(s/Math.max(1,k)); mx=Math.max(mx,out[i]); }
+  for(let i=0;i<n;i++) out[i]=clamp(Math.pow(out[i]/(mx||1),0.85),0.06,1);
+  return out;
+}
+async function loadAudio(file){
+  setStatus('노래 불러오는 중…');
+  try{
+    ensureAudioCtx();
+    const ab=await file.arrayBuffer(); const buf=await actx.decodeAudioData(ab);
+    if(P.buf) pause();
+    P.buf=buf; P.offset=0; peaks=computePeaks(buf,220); bandsFor=0;
+    S.rStart=0; S.rEnd=Math.min(30,buf.duration); $('fStart').value=fmt(0); $('fEnd').value=fmt(S.rEnd);
+    document.body.classList.add('has-audio'); $('audLabel').textContent=file.name; $('audDrop').classList.add('loaded'); stackKey='';
+    updateFmtNote(); setStatus('노래를 불러왔어요. 재생 버튼으로 미리 들어볼 수 있어요.');
+  }catch(e){ setStatus('이 파일은 열 수 없어요ㅜㅅㅜ mp3, wav, m4a 등의 오디오 파일을 넣어 주세요,'); }
+}
+function removeAudio(){ if(rec||exporting) return; pause(); P.buf=null; P.offset=0; peaks=null; document.body.classList.remove('has-audio'); $('audLabel').textContent='노래 파일 넣기 (선택)'; $('audDrop').classList.remove('loaded'); $('audIn').value=''; loopT0=performance.now(); updateFmtNote(); setStatus(''); }
+function loadImage(file){
+  const url=URL.createObjectURL(file), img=new Image();
+  img.onload=()=>{ setArt(img); URL.revokeObjectURL(url); $('imgLabel').textContent=file.name; $('imgDrop').classList.add('loaded'); setStatus('커버에 맞춰 색을 다시 설정했어요.'); };
+  img.onerror=()=>{ URL.revokeObjectURL(url); setStatus('이 이미지는 열 수 없어요. jpg, png, webp 파일을 넣어 주세요.'); };
+  img.src=url;
+}
+
+/* ---------- export ---------- */
+let DL;
+async function getDL(){
+  if(DL!==undefined) return DL;
+  if(!(window.claude && typeof window.claude.use==='function')) return null;
+  try{ DL=await window.claude.use('downloads'); }catch(e){ DL=null; }
+  return DL;
+}
+function anchorSave(name,blob){ const u=URL.createObjectURL(blob), a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),60000); setStatus('저장 완료! → '+name); }
+async function saveFile(name,blob){
+  const dl=await getDL();
+  if(dl){
+    try{ await dl.save({filename:name,data:blob}); setStatus('저장했어요: '+name); }
+    catch(e){ const code=e&&e.code;
+      if(code==='declined') setStatus('저장을 취소했어요.');
+      else if(code==='rate_limited') setStatus('저장 확인 창이 이미 열려 있어요. 그 창부터 닫아 주세요.');
+      else anchorSave(name,blob); }
+    return;
+  }
+  anchorSave(name,blob);
+}
+function baseName(){ const n=(S.title||'cover')+(S.artist?' - '+S.artist:''); return n.replace(/[\\/:*?"<>|]/g,'').trim().slice(0,80)||'cover'; }
+async function ensureFonts(){
+  const txt=(S.title+S.artist+S.sub+'0123456789:…')||'a';
+  const jobs=[700,500,400].map(w=>document.fonts.load(`${w} 40px "${S.font}"`,txt));
+
+  const builtIn = ['Noto Sans KR', 'Noto Serif KR', 'NeoDunggeunmo', 'KOTRA_SONGEULSSI', 'JetBrains Mono'];
+  if(!builtIn.includes(S.font)) {
+    jobs.push(...[700,500,400].map(w=>document.fonts.load(`${w} 40px "Noto Sans KR"`,txt)));
+  }
+  
+  jobs.push(document.fonts.load('700 40px "Inter Tight"','DOSERxVOL.01FORTHEARSONLYTAKEDAILYNXCMPI'));
+  jobs.push(document.fonts.load(`600 16px "${S.font}"`,'NOWPLAYING0123456789:%'+S.hudBL));
+  await Promise.all(jobs.map(j=>j.catch(()=>null)));
+  fontVer++; stackKey=''; updateFontNote();
+}
+function updateFontNote(){
+  const el=$('fontNote'); if(S.font!=='Pretendard'){ el.textContent=''; return; }
+  let ok=false; document.fonts.forEach(f=>{ if(f.family.replace(/["']/g,'')==='Pretendard' && f.status==='loaded') ok=true; });
+  el.textContent = ok ? '' : 'Pretendard를 불러오지 못해서 지금은 Noto Sans KR로 보여요. 컴퓨터에 Pretendard를 설치하거나, 이 페이지를 HTML 파일로 내려받아 열면 Pretendard로 나와요.';
+}
+async function savePng(){
+  await ensureFonts(); render(performance.now());
+  cv.toBlob(b=>{ if(b) saveFile(baseName()+'.png',b); else setStatus('PNG를 만들지 못했어요. 다시 눌러 주세요.'); },'image/png');
+}
+/* ---------- offline MP4 export (WebCodecs + mp4-muxer) ---------- */
+let exporting=null, FS=1;
+const yieldUI=()=>new Promise(r=>{ const ch=new MessageChannel(); ch.port1.onmessage=()=>r(); ch.port2.postMessage(0); });
+function fftInPlace(re,im){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){ let bit=n>>1; for(;j&bit;bit>>=1) j^=bit; j^=bit;
+    if(i<j){ let t=re[i]; re[i]=re[j]; re[j]=t; t=im[i]; im[i]=im[j]; im[j]=t; } }
+  for(let len=2;len<=n;len<<=1){ const ang=-2*Math.PI/len, wr=Math.cos(ang), wi=Math.sin(ang);
+    for(let i=0;i<n;i+=len){ let cr=1, ci=0;
+      for(let k=0;k<len/2;k++){ const a=i+k, b=a+len/2;
+        const xr=re[b]*cr-im[b]*ci, xi=re[b]*ci+im[b]*cr;
+        re[b]=re[a]-xr; im[b]=im[a]-xi; re[a]+=xr; im[a]+=xi;
+        const nr=cr*wr-ci*wi; ci=cr*wi+ci*wr; cr=nr; } } }
+}
+/* reproduces what the live AnalyserNode reports, but for any point in the song */
+function makeOfflineAnalyser(buf,fps){
+  const N=2048, sr=buf.sampleRate, A=buf.getChannelData(0), B=buf.numberOfChannels>1?buf.getChannelData(1):null;
+  const win=new Float32Array(N); for(let i=0;i<N;i++) win[i]=0.42-0.5*Math.cos(2*Math.PI*i/N)+0.08*Math.cos(4*Math.PI*i/N);
+  const re=new Float64Array(N), im=new Float64Array(N), td=new Float32Array(N), sm=new Float32Array(N/2);
+  const tau=Math.pow(0.75,60/fps);
+  return { at(t){
+    const s0=Math.floor(t*sr)-N;
+    for(let i=0;i<N;i++){ const j=s0+i; let x=0; if(j>=0&&j<A.length) x=B?(A[j]+B[j])*0.5:A[j]; td[i]=x; re[i]=x*win[i]; im[i]=0; }
+    fftInPlace(re,im);
+    for(let k=0;k<N/2 && k<freq.length;k++){ const mag=Math.hypot(re[k],im[k])/N; sm[k]=tau*sm[k]+(1-tau)*mag;
+      const db=20*Math.log10(sm[k]+1e-12); freq[k]=clamp(Math.round((db+100)/70*255),0,255); }
+    for(let i=0;i<N && i<wave.length;i++) wave[i]=clamp(Math.round(128*(1+td[i])),0,255);
+  }};
+}
+/* ---------- tiny MP4/MOV muxer (H.264 + AAC or PCM) ---------- */
+const MX=(()=>{
+  const te=new TextEncoder();
+  const cat=arrs=>{ let n=0; for(const a of arrs) n+=a.length; const o=new Uint8Array(n); let p=0; for(const a of arrs){ o.set(a,p); p+=a.length; } return o; };
+  const U8=n=>new Uint8Array([n&255]);
+  const U16=n=>{ const b=new Uint8Array(2); new DataView(b.buffer).setUint16(0,n&0xffff); return b; };
+  const U32=n=>{ const b=new Uint8Array(4); new DataView(b.buffer).setUint32(0,n>>>0); return b; };
+  const U64=n=>{ const b=new Uint8Array(8), d=new DataView(b.buffer); d.setUint32(0,Math.floor(n/4294967296)); d.setUint32(4,n>>>0); return b; };
+  const S4=s=>te.encode(s), Z=n=>new Uint8Array(n);
+  const arr32=list=>{ const b=new Uint8Array(list.length*4), d=new DataView(b.buffer); for(let i=0;i<list.length;i++) d.setUint32(i*4,list[i]>>>0); return b; };
+  const box=(t,...p)=>{ const body=cat(p.flat()); return cat([U32(body.length+8),S4(t),body]); };
+  const fbox=(t,v,f,...p)=>box(t,U8(v),U8(f>>16),U8(f>>8),U8(f),...p);
+  const MATRIX=arr32([0x10000,0,0,0,0x10000,0,0,0,0x40000000]);
+  const runs=list=>{ const out=[]; for(const x of list){ const l=out[out.length-1]; if(l&&l[1]===x) l[0]++; else out.push([1,x]); } return out; };
+  const desc=(tag,body)=>{ const L=body.length; return cat([U8(tag),U8(0x80|((L>>21)&127)),U8(0x80|((L>>14)&127)),U8(0x80|((L>>7)&127)),U8(L&127),body]); };
+  const ascFor=(sr,ch)=>{ const fi=[96000,88200,64000,48000,44100,32000,24000,22050,16000,12000,11025,8000].indexOf(sr); return new Uint8Array([(2<<3)|(fi>>1),((fi&1)<<7)|(ch<<3)]); };
+
+  function create(o){
+    const mov=o.container==='mov', VTS=90000, vd=Math.round(VTS/o.fps);
+    const V={s:[],desc:null}, A={s:[],desc:null};
+    function stsc(chunks){ const e=[]; chunks.forEach((c,i)=>{ const k=c.spc||c.n, l=e[e.length-1]; if(!l||l[1]!==k) e.push([i+1,k]); });
+      return fbox('stsc',0,0,U32(e.length),...e.map(([f,n])=>arr32([f,n,1]))); }
+    function hdlr(type,name,comp){ const nm=te.encode(name);
+      return fbox('hdlr',0,0,S4(mov?(comp||'mhlr'):'\0\0\0\0'),S4(type),Z(12),mov?cat([U8(nm.length),nm]):cat([nm,U8(0)])); }
+    function dinf(){ return box('dinf',fbox('dref',0,0,U32(1),mov?fbox('alis',0,1):fbox('url ',0,1))); }
+    function tkhd(id,dur,audio){ return fbox('tkhd',0,3,U32(0),U32(0),U32(id),U32(0),U32(dur),Z(8),U16(0),U16(audio?1:0),U16(audio?0x100:0),U16(0),MATRIX,U32(audio?0:o.width*65536),U32(audio?0:o.height*65536)); }
+    function mdhd(ts,dur){ return fbox('mdhd',0,0,U32(0),U32(0),U32(ts),U32(dur),U16(0x55c4),U16(0)); }
+
+    function build(vChunks,aChunks,vOff,aOff){
+      const N=V.s.length, vDur=N*vd, movieV=Math.round(vDur/VTS*1000);
+      const offs=V.s.map((s,i)=>s.pts-i*vd), mn=Math.min(0,...offs), shift=-mn, hasCtts=offs.some(x=>x!==0);
+      const keys=[]; V.s.forEach((s,i)=>{ if(s.key) keys.push(i+1); });
+      const vEntry=box('avc1',Z(6),U16(1),U16(0),U16(0),Z(12),U16(o.width),U16(o.height),U32(0x480000),U32(0x480000),U32(0),U16(1),Z(32),U16(0x18),U16(0xffff),box('avcC',V.desc));
+      const vstbl=box('stbl',
+        fbox('stsd',0,0,U32(1),vEntry),
+        fbox('stts',0,0,U32(1),U32(N),U32(vd)),
+        hasCtts?(()=>{ const r=runs(offs.map(x=>x+shift)); return fbox('ctts',0,0,U32(r.length),...r.map(([c,v])=>arr32([c,v]))); })():[],
+        keys.length<N?fbox('stss',0,0,U32(keys.length),arr32(keys)):[],
+        stsc(vChunks),
+        fbox('stsz',0,0,U32(0),U32(N),arr32(V.s.map(s=>s.data.length))),
+        fbox('co64',0,0,U32(vOff.length),...vOff.map(U64)));
+      const vtrak=box('trak',tkhd(1,movieV,false),
+        shift?box('edts',fbox('elst',0,0,U32(1),U32(movieV),U32(shift),U16(1),U16(0))):[],
+        box('mdia',mdhd(VTS,vDur),hdlr('vide','VideoHandler'),
+          box('minf',fbox('vmhd',0,1,U16(0),U16(0),U16(0),U16(0)),mov?hdlr('alis','DataHandler','dhlr'):[],dinf(),vstbl)));
+      let traks=[vtrak], movieDur=movieV;
+      if(o.audio){
+        const sr=o.audio.sampleRate, ch=o.audio.channels, pcm=o.audio.codec==='pcm';
+        let entry, stts, stsz, aDur;
+        if(pcm){
+          const frames=A.s.reduce((t,s)=>t+s.n,0); aDur=frames;
+          entry=box('sowt',Z(6),U16(1),U16(0),U16(0),U32(0),U16(ch),U16(16),U16(0),U16(0),U32(sr*65536));
+          stts=fbox('stts',0,0,U32(1),U32(frames),U32(1));
+          stsz=fbox('stsz',0,0,U32(ch*2),U32(frames));
+        } else {
+          const durs=A.s.map(s=>s.dur); aDur=durs.reduce((t,x)=>t+x,0);
+          const asc=A.desc&&A.desc.length?A.desc:ascFor(sr,ch);
+          const esds=fbox('esds',0,0,desc(3,cat([U16(2),U8(0),desc(4,cat([U8(0x40),U8(0x15),U8(0),U16(0),U32(o.audio.bitrate||256000),U32(o.audio.bitrate||256000),desc(5,asc)])),desc(6,U8(2))])));
+          entry=box('mp4a',Z(6),U16(1),Z(8),U16(ch),U16(16),U16(0),U16(0),U32(sr*65536),esds);
+          const r=runs(durs); stts=fbox('stts',0,0,U32(r.length),...r.map(([c,v])=>arr32([c,v])));
+          stsz=fbox('stsz',0,0,U32(0),U32(A.s.length),arr32(A.s.map(s=>s.data.length)));
+        }
+        const movieA=Math.round(aDur/sr*1000); movieDur=Math.max(movieDur,movieA);
+        const astbl=box('stbl',fbox('stsd',0,0,U32(1),entry),stts,stsc(aChunks),stsz,fbox('co64',0,0,U32(aOff.length),...aOff.map(U64)));
+        traks.push(box('trak',tkhd(2,movieA,true),box('mdia',mdhd(sr,aDur),hdlr('soun','SoundHandler'),
+          box('minf',fbox('smhd',0,0,U16(0),U16(0)),mov?hdlr('alis','DataHandler','dhlr'):[],dinf(),astbl))));
+      }
+      const mvhd=fbox('mvhd',0,0,U32(0),U32(0),U32(1000),U32(movieDur),U32(0x10000),U16(0x100),Z(10),MATRIX,Z(24),U32(3));
+      return box('moov',mvhd,...traks);
+    }
+    return {
+      addVideo(data,key,ptsUs,descr){ if(descr&&!V.desc) V.desc=new Uint8Array(descr instanceof ArrayBuffer?descr:descr.buffer?new Uint8Array(descr.buffer,descr.byteOffset,descr.byteLength):descr); V.s.push({data,key,pts:Math.round(ptsUs*VTS/1e6)}); },
+      addAudio(data,durSamples,descr){ if(descr&&!A.desc) A.desc=new Uint8Array(descr instanceof ArrayBuffer?descr:descr.buffer?new Uint8Array(descr.buffer,descr.byteOffset,descr.byteLength):descr); A.s.push({data,dur:durSamples}); },
+      addPcm(data,frames){ A.s.push({data,n:frames}); },
+      finalize(){
+        if(!V.desc) throw new Error('missing avcC');
+        /* chunk plan: about one second per chunk, interleaved */
+        const vChunks=[]; for(let i=0;i<V.s.length;i+=o.fps) vChunks.push({i,n:Math.min(o.fps,V.s.length-i)});
+        const aChunks=[];
+        if(o.audio){ if(o.audio.codec==='pcm'){ A.s.forEach((s,i)=>aChunks.push({i,n:1,spc:s.n})); }
+          else { let i=0; while(i<A.s.length){ let d=0,n=0; while(i+n<A.s.length && d<o.audio.sampleRate){ d+=A.s[i+n].dur; n++; } aChunks.push({i,n}); i+=n; } } }
+        const order=[]; for(let k=0;k<Math.max(vChunks.length,aChunks.length);k++){ if(vChunks[k]) order.push(['v',k]); if(aChunks[k]) order.push(['a',k]); }
+        const ftyp=mov?box('ftyp',S4('qt  '),U32(0x200),S4('qt  ')):box('ftyp',S4('isom'),U32(512),S4('isom'),S4('iso2'),S4('avc1'),S4('mp41'));
+        const chunkBytes=(t,k)=>{ const c=t==='v'?vChunks[k]:aChunks[k], src=t==='v'?V.s:A.s; let b=0; for(let j=0;j<c.n;j++) b+=src[c.i+j].data.length; return b; };
+        let total=0; for(const [t,k] of order) total+=chunkBytes(t,k);
+        const big=total+8>0xffffffff, mdatHead=big?cat([U32(1),S4('mdat'),U64(total+16)]):cat([U32(total+8),S4('mdat')]);
+        const vOff=new Array(vChunks.length).fill(0), aOff=new Array(aChunks.length).fill(0);
+        const moovLen=build(vChunks,aChunks,vOff,aOff).length;
+        let p=ftyp.length+moovLen+mdatHead.length;
+        for(const [t,k] of order){ (t==='v'?vOff:aOff)[k]=p; p+=chunkBytes(t,k); }
+        const moov=build(vChunks,aChunks,vOff,aOff);
+        const parts=[ftyp,moov,mdatHead];
+        for(const [t,k] of order){ const c=t==='v'?vChunks[k]:aChunks[k], src=t==='v'?V.s:A.s; for(let j=0;j<c.n;j++) parts.push(src[c.i+j].data); }
+        return parts;
+      }
+    };
+  }
+  return {create};
+})();
+
+let offlineCache={key:'',val:null}, offlineReason='';
+async function pickOfflineCodecs(withAudio){
+  offlineReason='';
+  if(typeof VideoEncoder==='undefined' || typeof VideoFrame==='undefined'){ offlineReason='이 브라우저에 WebCodecs 기능이 없어요'; return null; }
+  if(!window.isSecureContext){ offlineReason='보안 연결(https)이 아닌 주소에서 열려 있어요'; return null; }
+  const fps=S.fps, sr=withAudio?P.buf.sampleRate:0, key=fps+'|'+sr;
+  if(offlineCache.key===key){ offlineReason=offlineCache.reason; return offlineCache.val; }
+  const br=fps===60?18e6:12e6;
+  const vlist=fps===60?['avc1.64002A','avc1.640032','avc1.4D002A','avc1.42002A']:['avc1.640028','avc1.4D0028','avc1.420028','avc1.64002A'];
+  let v=null;
+  for(const codec of vlist){ for(const hw of ['no-preference','prefer-software']){
+    const cfg={codec,width:W,height:H,bitrate:br,framerate:fps,avc:{format:'avc'},hardwareAcceleration:hw};
+    try{ if((await VideoEncoder.isConfigSupported(cfg)).supported){ v=cfg; break; } }catch(e){} } if(v) break; }
+  let a=null;
+  if(v && withAudio){
+    const encSr=(sr===44100||sr===48000)?sr:48000;
+    if(typeof AudioEncoder!=='undefined'){
+      /* Windows' AAC encoder only accepts 96/128/160/192 kbps, so try those before giving up */
+      for(const br of [192000,160000,128000,256000,undefined]){
+        const cfg={codec:'mp4a.40.2',sampleRate:encSr,numberOfChannels:2}; if(br) cfg.bitrate=br;
+        try{ if((await AudioEncoder.isConfigSupported(cfg)).supported){ a={codec:'aac',cfg,sampleRate:encSr,bitrate:br||192000}; break; } }catch(e){}
+      } }
+    if(!a) a={codec:'pcm',sampleRate:sr};
+  }
+  if(!v) offlineReason='H.264 영상 인코더를 찾지 못했어요';
+  const val=v?{v,a,container:(a&&a.codec==='pcm')?'mov':'mp4'}:null;
+  offlineCache={key,val,reason:offlineReason}; return val;
+}
+async function resampleTo(buf,sr){
+  if(buf.sampleRate===sr) return buf;
+  const oc=new OfflineAudioContext(Math.min(2,buf.numberOfChannels),Math.ceil(buf.duration*sr),sr);
+  const s=oc.createBufferSource(); s.buffer=buf; s.connect(oc.destination); s.start();
+  return await oc.startRendering();
+}
+async function exportOffline(codecs){
+  const withAudio=!!P.buf, fps=S.fps;
+  let start=0, end=S.loopLen;
+  if(withAudio){ const d=P.buf.duration;
+    if(S.range==='part'){ start=clamp(S.rStart,0,d); end=clamp(S.rEnd,0,d); } else { start=0; end=d; }
+    if(end-start<1){ setStatus('구간이 너무 짧아요. 끝 시간을 시작보다 1초 이상 뒤로 잡아 주세요.'); return; }
+  }
+  await ensureFonts();
+  if(withAudio) pause();
+  const job={cancelled:false}; exporting=job; setRecUI(true);
+  const nFrames=Math.round((end-start)*fps);
+  let err=null;
+  try{
+    const mux=MX.create({fps,width:W,height:H,container:codecs.container,
+      audio:withAudio?{codec:codecs.a.codec,sampleRate:codecs.a.sampleRate,channels:2,bitrate:codecs.a.bitrate||192000}:null});
+    const ve=new VideoEncoder({
+      output:(ch,meta)=>{ const d=new Uint8Array(ch.byteLength); ch.copyTo(d); mux.addVideo(d,ch.type==='key',ch.timestamp,meta&&meta.decoderConfig&&meta.decoderConfig.description); },
+      error:e=>{ err=e; }});
+    ve.configure(codecs.v);
+
+    if(withAudio){
+      setStatus('음악 담는 중…');
+      const buf=codecs.a.codec==='aac'?await resampleTo(P.buf,codecs.a.sampleRate):P.buf;
+      const sr=buf.sampleRate, s0=Math.floor(start*sr), s1=Math.min(buf.length,Math.floor(end*sr));
+      const L=buf.getChannelData(0), R=buf.numberOfChannels>1?buf.getChannelData(1):L;
+      if(codecs.a.codec==='aac'){
+        const ae=new AudioEncoder({
+          output:(ch,meta)=>{ const d=new Uint8Array(ch.byteLength); ch.copyTo(d); mux.addAudio(d,ch.duration?Math.round(ch.duration*sr/1e6):1024,meta&&meta.decoderConfig&&meta.decoderConfig.description); },
+          error:e=>{ err=e; }});
+        ae.configure(codecs.a.cfg);
+        const CH=8192;
+        for(let i=s0;i<s1;i+=CH){
+          if(job.cancelled||err) break;
+          const n=Math.min(CH,s1-i), data=new Float32Array(n*2);
+          data.set(L.subarray(i,i+n),0); data.set(R.subarray(i,i+n),n);
+          const ad=new AudioData({format:'f32-planar',sampleRate:sr,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round((i-s0)/sr*1e6),data});
+          ae.encode(ad); ad.close();
+          if(ae.encodeQueueSize>16) await yieldUI();
+        }
+        await ae.flush(); ae.close();
+      } else {
+        for(let i=s0;i<s1;i+=sr){
+          const n=Math.min(sr,s1-i), b=new Int16Array(n*2);
+          for(let j=0;j<n;j++){ b[2*j]=Math.max(-32768,Math.min(32767,Math.round(L[i+j]*32767))); b[2*j+1]=Math.max(-32768,Math.min(32767,Math.round(R[i+j]*32767))); }
+          mux.addPcm(new Uint8Array(b.buffer),n);
+        }
+      }
+    }
+
+    const ana=withAudio?makeOfflineAnalyser(P.buf,fps):null;
+    barVal.fill(0); bassS=0; FS=60/fps;
+    setStatus('영상 만드는 중 . . . 다른 탭으로 가도 계속 진행돼요!');
+    for(let f=0;f<nFrames;f++){
+      if(job.cancelled||err) break;
+      const tl=f/fps;
+      if(ana) ana.at(start+tl);
+      render(0,{t:withAudio?start+tl:tl});
+      const vf=new VideoFrame(cv,{timestamp:Math.round(tl*1e6),duration:Math.round(1e6/fps)});
+      ve.encode(vf,{keyFrame:f%(fps*2)===0}); vf.close();
+      while(ve.encodeQueueSize>3) await yieldUI();
+      if(f%3===0){ $('meterBar').style.width=(f/nFrames*100).toFixed(1)+'%'; await yieldUI(); }
+    }
+    if(err) throw err;
+    if(job.cancelled){ try{ ve.close(); }catch(e){} return; }
+    await ve.flush(); ve.close();
+    if(err) throw err;
+    $('meterBar').style.width='100%';
+    const mov=codecs.container==='mov';
+    const blob=new Blob(mux.finalize(),{type:mov?'video/quicktime':'video/mp4'});
+    setStatus(`영상이 준비됐어요 (${(blob.size/1048576).toFixed(1)}MB). 저장 중…`);
+    exporting=null; FS=1; setRecUI(false);
+    await saveFile(baseName()+(mov?'.mov':'.mp4'),blob);
+  }catch(e){
+    console.error(e);
+    setStatus('영상을 만들다가 문제가 생겼어요. 프레임을 30fps로 바꿔서 다시 저장해 보세요.');
+  }finally{
+    if(exporting===job){ const c=job.cancelled; exporting=null; FS=1; setRecUI(false); if(c) setStatus('내보내기를 취소했어요 ㅜㅅㅜ'); }
+  }
+}
+
+function pickMime(withAudio){
+  if(typeof MediaRecorder==='undefined' || !cv.captureStream) return null;
+  const list = withAudio
+    ? ['video/mp4;codecs=avc1.640032,mp4a.40.2','video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1.4d0028,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1,opus','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']
+    : ['video/mp4;codecs=avc1.640032','video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1.4d0028','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'];
+  return list.find(m=>{ try{ return MediaRecorder.isTypeSupported(m); }catch(e){ return false; } })||null;
+}
+async function updateFmtNote(){
+  const el=$('fmtNote'), withAudio=!!P.buf;
+  const off=await pickOfflineCodecs(withAudio);
+  if(off){
+    const mov=off.container==='mov';
+    $('recBtn').disabled=false; $('recBtn').textContent=mov?'MOV로 저장하기':'MP4로 저장하기';
+    el.innerHTML=(mov
+      ? '✦ 재생 시간 정보가 들어간 <b>MOV</b>로 저장돼요.<br>✦ 이 브라우저엔 AAC 소리 압축 기능이 없어서 소리를 무손실로 저장할게요.'
+      : '✦ 재생 시간 정보가 들어간 <b>MP4</b>로 저장돼요.')
+      +(withAudio?'':'<br>✦ 반복 영상은 <b>끝→처음이 자연스럽게 이어지도록</b> 만들어져요.');
+    return;
+  }
+  const m=pickMime(withAudio);
+  const timing = withAudio ? '✦ 영상은 노래와 같은 속도로 녹화돼서, 고른 범위만큼 시간이 걸려요.<br>✦ 그동안 화면을 끄지 말아 주세요!' : '✦ 반복 영상은 <b>끝→처음이 자연스럽게 이어지도록</b> 만들어져요.';
+  if(!m){ el.innerHTML='이 브라우저는 영상 저장을 지원하지 않아요.<br>Chrome 최신 버전에서 열어 주세요.'; $('recBtn').disabled=true; return; }
+  $('recBtn').disabled=false;
+  $('recBtn').textContent = m.startsWith('video/mp4') ? 'MP4로 저장하기' : 'WebM으로 저장하기';
+  el.innerHTML = '✦ 이 브라우저에서는 실시간 녹화 방식으로 저장돼서, 재생 시간이 표시되지 않을 수 있어요.<br>' + timing + (offlineReason?'<br><span style="opacity:.7">(이유: '+offlineReason+')</span>':'');
+}
+async function startRecord(){
+  if(rec||exporting) return;
+  const off=await pickOfflineCodecs(!!P.buf);
+  if(off) return exportOffline(off);
+  const withAudio=!!P.buf, mime=pickMime(withAudio);
+  if(!mime){ updateFmtNote(); return; }
+  let start=0,end=0;
+  if(withAudio){ const d=P.buf.duration;
+    if(S.range==='part'){ start=clamp(S.rStart,0,d); end=clamp(S.rEnd,0,d); } else { start=0; end=d; }
+    if(end-start<1){ setStatus('구간이 너무 짧아요. 끝 시간을 시작보다 1초 이상 뒤로 잡아 주세요.'); return; }
+    await actx.resume();
+  }
+  await ensureFonts();
+  const stream=cv.captureStream(S.fps);
+  if(withAudio) recDest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
+  try{ rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:S.fps===60?24e6:16e6,audioBitsPerSecond:256000}); }
+  catch(e){ rec=null; stream.getVideoTracks().forEach(t=>t.stop()); setStatus('녹화를 시작하지 못했어요. 프레임을 30fps로 바꿔서 다시 해 보세요.'); return; }
+  const chunks=[];
+  rec.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+  rec.onstop = async () => {
+    stream.getVideoTracks().forEach(t => t.stop());
+    const info = recInfo; rec = null; recInfo = null;
+    if (monitorGain) monitorGain.gain.value = 1;
+    setRecUI(false);
+
+    if (info.cancelled) {
+      setStatus('내보내기를 취소했어요 ㅜㅅㅜ');
+      return;
+    }
+
+    let blob = new Blob(chunks, { type: mime.split(';')[0] });
+    const ext = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
+
+    try {
+      if (window.EBML && ext === 'webm') {
+        setStatus('재생 바 정보 추가 중…');
+        const decoder = new EBML.Decoder();
+        const reader = new EBML.Reader();
+        reader.logging = false;
+        reader.drop_default_duration = false;
+
+        const buf = await blob.arrayBuffer();
+        const elms = decoder.decode(buf);
+        elms.forEach(elm => reader.read(elm));
+        reader.stop();
+
+        const refinedMetadataBuf = EBML.tools.makeMetadataSeekable(
+          reader.metadatas,
+          reader.duration,
+          reader.cues
+        );
+        const body = buf.slice(reader.metadataSize);
+        blob = new Blob([refinedMetadataBuf, body], { type: 'video/webm' });
+      }
+    } catch (err) {
+      console.warn('메타데이터 주입 실패:', err);
+    }
+
+    setStatus(`영상이 준비됐어요 (${(blob.size / 1048576).toFixed(1)}MB). 저장 중…`);
+    await saveFile(baseName() + '.' + ext, blob);
+  };
+  recInfo={withAudio,start,end,dur:withAudio?end-start:S.loopLen,t0:performance.now(),cancelled:false};
+  if(withAudio){ pause(); if(S.mute) monitorGain.gain.value=0; rec.start(1000); play(start); }
+  else { loopT0=performance.now(); recInfo.t0=loopT0; rec.start(1000); }
+  setRecUI(true); setStatus('녹화 중이에요. 화면을 끄지 말아 주세요 ( _ _)♡');
+}
+function stopRecord(cancel){ if(exporting){ exporting.cancelled=!!cancel; return; } if(!rec||!recInfo) return; recInfo.cancelled=cancel; if(recInfo.withAudio) pause(); if(rec.state!=='inactive') rec.stop(); }
+function setRecUI(on){
+  $('recBtn').classList.toggle('hidden',on); $('cancelBtn').classList.toggle('hidden',!on);
+  $('meter').classList.toggle('hidden',!on); $('meterBar').style.width='0%';
+  $('pngBtn').disabled=on; $('playBtn').disabled=on; $('seek').disabled=on; $('audIn').disabled=on; $('imgIn').disabled=on;
+}
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && rec) setStatus('탭을 바꾸거나 최소화하면 녹화가 끊길 수 있어요. 화면을 계속 켜 주세요!'); });
+
+/* ---------- main loop ---------- */
+let seeking=false, lastUi=0;
+function loop(now){
+  if(!exporting) render(now);
+  if(recInfo && rec && rec.state==='recording'){
+    const el = recInfo.withAudio ? ptime()-recInfo.start : (performance.now()-recInfo.t0)/1000;
+    $('meterBar').style.width=clamp(el/recInfo.dur*100,0,100)+'%';
+    if(el>=recInfo.dur || (recInfo.withAudio && !P.playing)) stopRecord(false);
+  }
+  if(P.buf && now-lastUi>100){ lastUi=now; const t=ptime();
+    $('time').textContent=fmt(t)+' / '+fmt(P.buf.duration);
+    if(!seeking){ $('seek').value=Math.round(t/P.buf.duration*1000); paintRange($('seek')); } }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- UI wiring ---------- */
+function setStatus(t){ $('status').textContent=t; }
+document.querySelectorAll('.seg').forEach(seg=>{
+  const key=seg.dataset.key;
+  const sync=()=>seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(String(S[key])===b.dataset.val)));
+  seg.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+    S[key]= key==='fps' ? parseInt(b.dataset.val,10) : b.dataset.val; sync();
+    if(key==='mood') themeDirty=true;
+    if(key==='fps') updateFmtNote();
+    if(key==='fps' && S.hudBLAuto){ S.hudBL=S.fps+'FPS'; $('fHudBL').value=S.hudBL; }
+    if(key==='deco') document.body.classList.toggle('deco-cyber',S.deco==='cyber');
+    if(key==='range') $('rangeBox').classList.toggle('hidden',S.range!=='part');
+    stackKey='';
+  });
+  sync();
+});
+let fontTimer=0;
+const onText=()=>{ clearTimeout(fontTimer); fontTimer=setTimeout(ensureFonts,250); };
+$('fTitle').addEventListener('input',e=>{ S.title=e.target.value; onText(); });
+$('fArtist').addEventListener('input',e=>{ S.artist=e.target.value; onText(); });
+$('fSub').addEventListener('input',e=>{ S.sub=e.target.value; onText(); });
+$('fRadius').addEventListener('input',e=>{ S.radius=+e.target.value; $('vRadius').textContent=e.target.value; });
+$('fAccAuto').addEventListener('change',e=>{ S.accentAuto=e.target.checked; $('fAcc').disabled=S.accentAuto; $('accHex').disabled = S.accentAuto; $('accWrap').classList.toggle('off',S.accentAuto); if(!S.accentAuto) S.accentHex=$('fAcc').value; themeDirty=true; });
+$('fAcc').addEventListener('input',e=>{ S.accentHex=e.target.value; $('accHex').value=e.target.value.toUpperCase(); themeDirty=true; });
+$('accHex').addEventListener('input', e => {
+  let val = e.target.value.trim();
+  if(!val.startsWith('#')) val = '#' + val;
+  // 유효한 6자리 헥스코드(#FFFFFF 형태)인 경우에만 렌더링 반영
+  if(/^#[0-9A-Fa-f]{6}$/.test(val)){
+    S.accentHex = val;
+    $('fAcc').value = val;
+    themeDirty = true;
+  }
+});
+
+// 포커스가 빠져나갈 때 대문자 및 # 정돈
+$('accHex').addEventListener('change', e => {
+  let val = e.target.value.trim();
+  if(!val.startsWith('#')) val = '#' + val;
+  if(/^#[0-9A-Fa-f]{6}$/.test(val)){
+    e.target.value = val.toUpperCase();
+    S.accentHex = val;
+    $('fAcc').value = val;
+    themeDirty = true;
+  } else {
+    // 오타가 났다면 현재 적용된 색상 코드로 되돌림
+    e.target.value = $('fAcc').value.toUpperCase();
+  }
+});
+$('imgRemove').addEventListener('click',()=>{ if(rec||exporting) return; useDemo(); $('imgIn').value=''; $('imgLabel').textContent='앨범 커버 넣기 (정방형 권장)'; $('imgDrop').classList.remove('loaded'); setStatus('기본 이미지로 돌아갔어요.'); });
+const paintRange=el=>el.style.setProperty('--val',((el.value-el.min)/(el.max-el.min)*100)+'%');
+document.querySelectorAll('.range-row input[type=range]').forEach(el=>{ paintRange(el); el.addEventListener('input',()=>paintRange(el)); });
+$('fProg').addEventListener('change',e=>{ S.progress=e.target.checked; });
+$('fMotion').addEventListener('change',e=>{ S.motion=e.target.checked; });
+$('fReact').addEventListener('change',e=>{ S.react=e.target.checked; });
+$('fGrain').addEventListener('change',e=>{ S.grain=e.target.checked; });
+$('fHud').addEventListener('change',e=>{ S.hud=e.target.checked; });
+$('fHudBL').addEventListener('input',e=>{ S.hudBL=e.target.value; S.hudBLAuto=false; onText(); });
+$('fScan').addEventListener('change',e=>{ S.scan=e.target.checked; });
+$('fMute').addEventListener('change',e=>{ S.mute=e.target.checked; });
+$('fDur').addEventListener('change',e=>{ const v=parseTime(e.target.value); if(v>0){ S.fakeDur=v; e.target.value=fmt(v); } else e.target.value=fmt(S.fakeDur); });
+$('fPos').addEventListener('input',e=>{ S.fakePos=e.target.value/100; });
+$('fLoop').addEventListener('input',e=>{ S.loopLen=+e.target.value; $('vLoop').textContent=e.target.value+'초'; loopT0=performance.now(); });
+$('fStart').addEventListener('change',e=>{ const v=parseTime(e.target.value); if(v>=0){ S.rStart=v; } e.target.value=fmt(S.rStart); });
+$('fEnd').addEventListener('change',e=>{ const v=parseTime(e.target.value); if(v>0){ S.rEnd=v; } e.target.value=fmt(S.rEnd); });
+$('imgIn').addEventListener('change',e=>{ const f=e.target.files[0]; if(f) loadImage(f); });
+$('audIn').addEventListener('change',e=>{ const f=e.target.files[0]; if(f) loadAudio(f); });
+$('audRemove').addEventListener('click',removeAudio);
+$('playBtn').addEventListener('click',async()=>{ if(!P.buf||rec||exporting) return; await actx.resume();
+  if(P.playing) pause(); else { if(P.offset>=P.buf.duration-0.05) P.offset=0; play(P.offset); } });
+$('seek').addEventListener('pointerdown',()=>seeking=true);
+$('seek').addEventListener('pointerup',()=>seeking=false);
+$('seek').addEventListener('input',e=>{ if(P.buf) seekTo(e.target.value/1000*P.buf.duration); });
+$('seek').addEventListener('change',()=>seeking=false);
+$('pngBtn').addEventListener('click',savePng);
+$('recBtn').addEventListener('click',startRecord);
+$('cancelBtn').addEventListener('click',()=>stopRecord(true));
+
+const dz=document.body; let dragDepth=0;
+dz.addEventListener('dragenter',e=>{ e.preventDefault(); dragDepth++; $('dropzone').classList.add('dragging'); });
+dz.addEventListener('dragleave',()=>{ dragDepth=Math.max(0,dragDepth-1); if(!dragDepth) $('dropzone').classList.remove('dragging'); });
+dz.addEventListener('dragover',e=>e.preventDefault());
+dz.addEventListener('drop',e=>{ e.preventDefault(); dragDepth=0; $('dropzone').classList.remove('dragging'); if(rec||exporting) return;
+  for(const f of e.dataTransfer.files){
+    if(f.type.startsWith('image/')) loadImage(f);
+    else if(f.type.startsWith('audio/') || /\.(mp3|wav|m4a|flac|ogg|aac)$/i.test(f.name)) loadAudio(f);
+  } });
+
+if(document.fonts) document.fonts.addEventListener && document.fonts.addEventListener('loadingdone',()=>{ fontVer++; stackKey=''; });
+
+document.body.classList.toggle('deco-cyber',S.deco==='cyber');
+useDemo();
+ensureFonts();
+updateFmtNote();
+window.addEventListener('load',()=>{ getDL(); });
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
